@@ -1,264 +1,1178 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>大衛教練｜增肌逆襲系統 v3.5</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#000000"/>
+<meta name="description" content="大衛教練 AI 智能增肌決策系統 v4.0 — 科學計算 TDEE、超商配餐、30天逆襲追蹤"/>
+<title>大衛教練｜AI 增肌決策系統 v4.0</title>
+
+<!-- ══ CDN ══ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
-/* ── RESET ── */
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{background:#000;color:#fff;font-family:'Segoe UI','Noto Sans TC','PingFang TC',sans-serif;min-height:100vh;overflow-x:hidden}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  background:#000;color:#fff;
+  font-family:'Segoe UI','Noto Sans TC','PingFang TC',sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  overscroll-behavior:none;
+}
 input:focus,select:focus,button:focus{outline:none}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:#CCFF00;border-radius:2px}
 select option{background:#1a1a1a;color:#fff}
+textarea{resize:none}
 
-/* ── ANIMATIONS ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.anim-up{animation:fadeUp .45s cubic-bezier(.16,1,.3,1) both}
+/* ═══════════════════════════════════════════
+   CSS CUSTOM PROPS
+═══════════════════════════════════════════ */
+:root{
+  --green:#CCFF00;
+  --green-dim:#aaee00;
+  --gold:linear-gradient(135deg,#FFD700,#FF8800);
+  --card-bg:#0d0d0d;
+  --card-border:rgba(204,255,0,.1);
+  --surface:#111;
+}
+
+/* ═══════════════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .42s cubic-bezier(.16,1,.3,1) both}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.anim-in{animation:fadeIn .3s ease both}
 
 @keyframes breatheGreen{
-  0%,100%{box-shadow:0 0 10px #ccff0055,0 0 20px #ccff0020}
-  50%{box-shadow:0 0 28px #ccff00cc,0 0 55px #ccff0060,0 0 90px #ccff0020}
+  0%,100%{box-shadow:0 0 10px #ccff0055,0 0 22px #ccff0018}
+  50%{box-shadow:0 0 28px #ccff00cc,0 0 55px #ccff0060,0 0 88px #ccff0015}
 }
 .glow-green{animation:breatheGreen 2.5s ease-in-out infinite}
 
 @keyframes flameGold{
-  0%,100%{box-shadow:0 0 12px #ffaa0077,0 0 25px #ff880044}
-  50%{box-shadow:0 0 30px #ffdd00cc,0 0 60px #ffaa0088,0 0 100px #ff660033}
+  0%,100%{box-shadow:0 0 12px #ffaa0077,0 0 26px #ff880044}
+  50%{box-shadow:0 0 32px #ffdd00cc,0 0 64px #ffaa0088,0 0 100px #ff660028}
 }
 .glow-flame{animation:flameGold 1.8s ease-in-out infinite}
 
 @keyframes breatheRed{
-  0%,100%{box-shadow:0 0 8px #ff444455,0 0 16px #ff222230}
+  0%,100%{box-shadow:0 0 8px #ff444455,0 0 16px #ff222228}
   50%{box-shadow:0 0 22px #ff4444cc,0 0 44px #ff222266}
 }
 .glow-red{animation:breatheRed 2s ease-in-out infinite}
 
 @keyframes scanDrift{
   0%{transform:translateY(-100%);opacity:0}
-  5%{opacity:1}95%{opacity:.6}
+  5%{opacity:1}95%{opacity:.45}
   100%{transform:translateY(105vh);opacity:0}
 }
-.scan::before{
+.scan-host::before{
   content:'';position:fixed;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(180deg,transparent,rgba(204,255,0,.07),transparent);
-  animation:scanDrift 8s linear infinite;pointer-events:none;z-index:998
+  background:linear-gradient(180deg,transparent,rgba(204,255,0,.06),transparent);
+  animation:scanDrift 9s linear infinite;pointer-events:none;z-index:997
 }
 
-@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px) scale(.95)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
-@keyframes toastOut{from{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}to{opacity:0;transform:translateX(-50%) translateY(16px) scale(.95)}}
-.toast-in{animation:toastIn .35s cubic-bezier(.16,1,.3,1) both}
-.toast-out{animation:toastOut .3s ease-in both}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(18px) scale(.95)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(14px) scale(.95)}}
+.toast-in{animation:toastIn .33s cubic-bezier(.16,1,.3,1) both}
+.toast-out{animation:toastOut .26s ease-in both}
 
-@keyframes badgePop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
-.badge-pop{animation:badgePop .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes badgePop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+.badge-pop{animation:badgePop .48s cubic-bezier(.34,1.56,.64,1) both}
 
-@keyframes progressFill{from{width:0}to{width:var(--w)}}
-.progress-fill{animation:progressFill 1s cubic-bezier(.16,1,.3,1) both}
+@keyframes barFill{from{width:0}to{width:var(--w)}}
+.bar-fill{animation:barFill .9s cubic-bezier(.16,1,.3,1) .2s both}
 
-@keyframes cardReveal{0%{opacity:0;transform:scale(.96) translateY(12px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-.card-reveal{animation:cardReveal .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes cardReveal{0%{opacity:0;transform:scale(.97) translateY(10px)}100%{opacity:1;transform:none}}
+.card-reveal{animation:cardReveal .45s cubic-bezier(.16,1,.3,1) both}
 
-@keyframes ripple{0%{transform:scale(0);opacity:.6}100%{transform:scale(4);opacity:0}}
-.ripple-container{position:relative;overflow:hidden}
-.ripple-effect{position:absolute;border-radius:50%;background:rgba(0,0,0,.3);animation:ripple .5s linear;pointer-events:none}
+@keyframes rippleAnim{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}
+.ripple-host{position:relative;overflow:hidden}
+.ripple-dot{position:absolute;border-radius:50%;background:rgba(0,0,0,.25);animation:rippleAnim .5s linear;pointer-events:none}
 
-@keyframes quoteFade{0%,100%{opacity:.65}50%{opacity:1}}
-.quote-pulse{animation:quoteFade 3.5s ease-in-out infinite}
+@keyframes quotePulse{0%,100%{opacity:.55}50%{opacity:1}}
+.quote-anim{animation:quotePulse 3.5s ease-in-out infinite}
 
-/* ── BLUR LOCK ── */
+@keyframes chatBubble{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.chat-bubble{animation:chatBubble .35s cubic-bezier(.16,1,.3,1) both}
+
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{
+  background:linear-gradient(90deg,#111 25%,#1a1a1a 50%,#111 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite
+}
+
+/* ═══════════════════════════════════════════
+   REUSABLE COMPONENTS
+═══════════════════════════════════════════ */
 .blur-lock{filter:blur(5px);user-select:none;pointer-events:none}
-.lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(180deg,#00000000 0%,#000000bb 30%,#000 100%);z-index:10;border-radius:14px;padding:24px 20px}
+.lock-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.85) 35%,#000 100%);
+  z-index:10;border-radius:14px;padding:24px 18px
+}
 
-/* ── TABLE ── */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tbl-wrap table{min-width:480px;width:100%;border-collapse:collapse}
-.tbl-wrap th{font-size:10px;letter-spacing:1.5px;font-weight:700;color:#555;padding:8px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid #1a1a1a}
-.tbl-wrap td{font-size:12px;padding:8px 12px;white-space:nowrap;border-bottom:1px solid #141414}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-scroll table{min-width:460px;width:100%;border-collapse:collapse}
+.tbl-scroll th{font-size:10px;letter-spacing:1.5px;font-weight:700;color:#555;padding:8px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid #1a1a1a}
+.tbl-scroll td{font-size:12px;padding:8px 12px;white-space:nowrap;border-bottom:1px solid #141414}
 
-/* ── SHARE CARD ── */
 .share-card{
-  background:linear-gradient(135deg,#0a0a0a 0%,#111 50%,#0a0a0a 100%);
-  border:1.5px solid #CCFF00;
-  border-radius:20px;padding:24px;
-  box-shadow:0 0 40px #ccff0030,0 0 80px #ccff0010;
+  background:linear-gradient(135deg,#0a0a0a 0%,#111 60%,#0a0a0a 100%);
+  border:1.5px solid #CCFF00;border-radius:20px;padding:22px;
+  box-shadow:0 0 40px #ccff0028,0 0 80px #ccff000a;
   position:relative;overflow:hidden
 }
 .share-card::before{
-  content:'';position:absolute;top:-40%;right:-20%;
-  width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,#ccff0012 0%,transparent 70%);
-  pointer-events:none
+  content:'';position:absolute;top:-30%;right:-15%;
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,#ccff000e 0%,transparent 70%);pointer-events:none
 }
 
-/* ── FLOAT BTN ── */
 .float-btn{
-  position:fixed;bottom:24px;right:16px;z-index:990;
+  position:fixed;bottom:22px;right:14px;z-index:990;
   background:linear-gradient(135deg,#CCFF00,#aaee00);
   color:#000;border:none;border-radius:50px;
-  padding:14px 20px;font-size:14px;font-weight:900;
-  cursor:pointer;letter-spacing:.5px;
-  box-shadow:0 4px 20px #ccff0070,0 0 40px #ccff0030;
-  display:flex;align-items:center;gap:8px
+  padding:13px 18px;cursor:pointer;
+  display:flex;align-items:center;gap:9px;
+  box-shadow:0 4px 22px #ccff0070,0 0 44px #ccff0025;
+  -webkit-tap-highlight-color:transparent
 }
 .float-btn:active{transform:scale(.96)}
 
-/* ── WATERMARK ── */
-.watermark{
-  position:fixed;bottom:12px;left:50%;transform:translateX(-50%);
-  font-size:9px;letter-spacing:2px;color:#ccff0015;
-  font-weight:700;pointer-events:none;z-index:0;text-transform:uppercase;white-space:nowrap
+.wm{
+  position:fixed;bottom:8px;left:50%;transform:translateX(-50%);
+  font-size:9px;letter-spacing:2px;color:#ccff000f;
+  font-weight:700;pointer-events:none;z-index:0;white-space:nowrap
+}
+
+/* modal */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(6px)
+}
+.modal-box{
+  background:linear-gradient(135deg,#0a0a0a,#111,#0a0a0a);
+  border:1.5px solid #FFD70066;border-radius:20px;
+  padding:28px 22px;width:100%;max-width:420px;
+  box-shadow:0 0 60px #ffd70030,0 0 120px #ff880018;
+  position:relative
 }
 </style>
 </head>
 
-<body class="scan">
+<body class="scan-host">
 <div id="root"></div>
-<div class="watermark">COACH DAVID · MUSCLE SYSTEM v3.5 · ALL RIGHTS RESERVED</div>
+<div class="wm">COACH DAVID · AI MUSCLE SYSTEM v4.0 · ALL RIGHTS RESERVED</div>
 
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
-/* ══════════════════════════════════
-   CONSTANTS
-══════════════════════════════════ */
-const LS_KEY    = "coach_david_v35";
-const MAX_DAYS  = 30;
-const LINKTREE  = "https://linktr.ee/your_linktree"; // ← 替換成你的連結
+/* ══════════════════════════════════════════
+   ★  CONFIG
+══════════════════════════════════════════ */
+const LINKTREE_URL = "https://linktr.ee/daweishen";
+const LS_KEY       = "coach_david_v40";
+const MAX_DAYS     = 30;
 
+/* ══════════════════════════════════════════
+   STATIC DATA
+══════════════════════════════════════════ */
 const QUOTES = [
   "「自律，是你送給未來自己最好的禮物。」",
   "「每一口蛋白質，都是跟懦弱說再見的宣言。」",
   "「進度不明顯？那是因為你還不夠久。堅持才是最猛的天賦。」",
-  "「健身不是懲罰身體，而是在雕刻你的下一個版本。」",
+  "「健身不是懲罰，而是在雕刻你的下一個版本。」",
   "「不是沒時間，是你還沒把自己排進優先順序。」",
 ];
 
 const ACTIVITIES = [
-  {v:1.2,   s:"🪑", l:"久坐不動"},
-  {v:1.375, s:"🚶", l:"輕度活動（週 1–3）"},
-  {v:1.55,  s:"🏋️", l:"中度活動（週 3–5）"},
-  {v:1.725, s:"⚡", l:"高度活動（週 6–7）"},
+  {v:1.2,   s:"🪑", l:"久坐不動（辦公室族）"},
+  {v:1.375, s:"🚶", l:"輕度活動（週 1–3 天）"},
+  {v:1.55,  s:"🏋️", l:"中度活動（週 3–5 天）"},
+  {v:1.725, s:"⚡", l:"高度活動（週 6–7 天）"},
   {v:1.9,   s:"🔥", l:"極高強度（每天訓練）"},
 ];
 
-/* Coach comments */
-const COMMENTS = {
+const COACH_COMMENTS = {
   male:{
-    low:   "兄弟，代謝偏低代表肌肉量不足。每公斤補 1.6g 蛋白質，搭配重訓，三個月後你會認不出自己。",
+    low:"兄弟，代謝偏低代表肌肉量不足。每公斤補 1.6g 蛋白質，搭配重訓，三個月後你會認不出自己。",
     medium:"基礎到位！每天 300kcal 盈餘，漸進超負荷訓練，你的逆襲才剛啟動。",
-    high:  "強者！代謝旺盛是天賦。每公斤 2g 蛋白質，週 4 練，六個月後你就是健身房裡的傳說。",
+    high:"強者！代謝旺盛是天賦。每公斤 2g 蛋白質，週 4 練，六個月後你就是健身房裡的傳說。",
   },
   female:{
-    low:   "姐妹，別怕吃！代謝低代表需要喚醒肌肉。從優質蛋白質開始，大衛教練陪你練出線條。",
-    medium:"很棒的基礎！女生增肌節奏慢但持久。每天多 250kcal，堅持 90 天，體態會讓人驚訝。",
-    high:  "運動員代謝！別讓熱量不足阻礙你。達到增肌目標，你將擁有讓人羨慕的運動員體態。",
+    low:"姐妹，別怕吃！代謝低代表需要喚醒肌肉。從優質蛋白質開始，大衛教練陪你練出線條。",
+    medium:"很棒的基礎！女生增肌慢但持久。每天多 250kcal，堅持 90 天，體態讓人驚訝。",
+    high:"運動員代謝！別讓熱量不足阻礙你。達到增肌目標，擁有讓人羨慕的運動員體態。",
   },
 };
 
-/* Today's order templates */
-const buildOrder = (tdee, goal, prot, gender) => ({
-  calories: [
-    `目標攝取 ${goal} kcal（TDEE ${tdee} + 300 增肌盈餘）`,
-    `分 4–5 餐進食，每餐間隔不超過 4 小時`,
-    `訓練後 30 分鐘內補充碳水 + 蛋白質`,
-  ],
-  protein: [
-    `全天蛋白質目標：${prot}g`,
-    `每餐至少 ${Math.round(prot/5)}–${Math.round(prot/4)}g 蛋白質`,
-    gender==="male" ? "優先選擇：雞胸、鮪魚、雞蛋、豆漿" : "優先選擇：雞胸、水煮蛋、希臘優格、豆腐",
-  ],
-  lifestyle: [
-    "今日喝水目標：體重 × 35ml",
-    "睡眠 7–8 小時，生長激素主要在深睡期分泌",
-    "訓練後冰敷或拉伸 10 分鐘，加速恢復",
-  ],
+/* ── Newbie Mistakes (5 items, cycle) ── */
+const NEWBIE_MISTAKES = [
+  {icon:"❌",title:"蛋白質嚴重不足",desc:"90% 新手蛋白質攝取量不到建議的一半。每公斤體重至少需要 1.6g，肌肉才有原料生長。"},
+  {icon:"❌",title:"訓練頻率過高或過低",desc:"每天練同一個部位反而阻礙恢復。每個肌群週訓 2 次、每次 10–20 組是黃金區間。"},
+  {icon:"❌",title:"忽略漸進超負荷",desc:"每次用同樣重量訓練是在浪費時間。每 1–2 週增加重量或次數，才能持續刺激肌肉生長。"},
+  {icon:"❌",title:"熱量吃不夠",desc:"增肌期吃維持熱量，等於在原地踏步。每天盈餘 250–500kcal，才能提供肌肉合成的能量。"},
+  {icon:"❌",title:"睡眠不足 7 小時",desc:"生長激素 70% 在深睡期分泌。熬夜練再多都是白費，睡眠才是免費的合法增肌藥。"},
+];
+
+/* ── Food Red/Black List ── */
+const FOOD_BLACKLIST = [
+  {icon:"🚫",name:"炸排骨便當",why:"油炸衣吸油，熱量 900kcal+ 但蛋白質效益極差"},
+  {icon:"🚫",name:"珍珠奶茶全糖",why:"60g 精製糖、零蛋白質，增肌最大敵人"},
+  {icon:"🚫",name:"鹽酥雞大份",why:"反式脂肪 + 精煉高溫油，促進全身慢性炎症"},
+  {icon:"🚫",name:"速食薯條",why:"高 GI 碳水 + 壞油，血糖劇烈波動抑制脂肪燃燒"},
+  {icon:"🚫",name:"奶油厚片吐司",why:"精緻澱粉 + 飽和脂肪，增脂效率 S 級"},
+];
+const FOOD_WHITELIST = [
+  {icon:"✅",name:"雞胸肉滷味",why:"每 100g 含 22g 蛋白質，超商最高 CP 值選項"},
+  {icon:"✅",name:"希臘優格",why:"慢消化酪蛋白，睡前補充夜間持續合成"},
+  {icon:"✅",name:"毛豆一包",why:"植物蛋白 9g + 膳食纖維，零負擔增肌小零食"},
+  {icon:"✅",name:"水煮蛋 x2",why:"完全蛋白質，生物利用率最高的天然食物"},
+  {icon:"✅",name:"無糖黑豆漿",why:"500ml 含蛋白質 15g，超商最被低估的增肌飲品"},
+];
+
+/* ── AI Food Database ── */
+const FOOD_DB = [
+  // [name, kcal, protein, store, category]
+  ["義式雞胸肉",     120, 22, "7-11/全家",  "蛋白質"],
+  ["茶葉蛋",         78,  6,  "7-11",       "蛋白質"],
+  ["溫泉蛋",         70,  6,  "全家",       "蛋白質"],
+  ["無糖黑豆漿500ml",90,  15, "7-11/全家",  "蛋白質"],
+  ["無糖豆漿250ml",  45,  8,  "7-11/全家",  "蛋白質"],
+  ["希臘優格",       130, 14, "7-11/全家",  "蛋白質"],
+  ["水煮毛豆",       100, 9,  "7-11/全家",  "蛋白質"],
+  ["雞胸肉沙拉",     200, 22, "7-11",       "蛋白質"],
+  ["鮪魚飯糰",       200, 8,  "7-11/全家",  "碳水"],
+  ["地瓜(中)",       130, 2,  "7-11",       "碳水"],
+  ["FamiChicken去皮",250, 22, "全家",       "蛋白質"],
+  ["雞蛋豆腐",        90, 9,  "7-11/全家",  "蛋白質"],
+];
+
+/* ── AI Matching Engine ── */
+const aiMatch = (kcalGap, protGap) => {
+  // greedy: prioritise protein gap first, then fill calories
+  const selected = [];
+  let remKcal = Math.max(kcalGap, 0);
+  let remProt = Math.max(protGap, 0);
+  const pool  = [...FOOD_DB].sort((a,b)=>b[2]-a[2]); // sort by protein desc
+
+  for (const food of pool) {
+    if (remProt <= 0 && remKcal <= 0) break;
+    if (food[2] > 0 && remProt > 0) {
+      selected.push(food);
+      remKcal -= food[1];
+      remProt -= food[2];
+    }
+  }
+  if (remKcal > 0) {
+    const carbs = pool.filter(f=>f[4]==="碳水");
+    for (const food of carbs) {
+      if (remKcal <= 0) break;
+      if (!selected.includes(food)){ selected.push(food); remKcal -= food[1]; }
+    }
+  }
+  const totalKcal = selected.reduce((s,f)=>s+f[1],0);
+  const totalProt = selected.reduce((s,f)=>s+f[2],0);
+  return { items: selected.slice(0,4), totalKcal, totalProt };
+};
+
+/* ── Body Fat Estimate (US Navy method approx) ── */
+const estimateBF = (gender, bmi, age) => {
+  // simplified formula
+  const bf = gender==="male"
+    ? (1.20*bmi + 0.23*age - 16.2).toFixed(1)
+    : (1.20*bmi + 0.23*age - 5.4).toFixed(1);
+  return Math.max(5, Math.min(45, parseFloat(bf)));
+};
+
+/* ── Training Volume Recommendations ── */
+const trainingVol = (streak, bfPct) => {
+  const level = streak<7?"初學者":streak<21?"進階者":"健身老手";
+  return {
+    level,
+    sets:   level==="初學者"?"每部位週 10–12 組":level==="進階者"?"每部位週 14–18 組":"每部位週 18–22 組",
+    freq:   level==="初學者"?"週 3 天全身訓練":level==="進階者"?"週 4 天上下肢分化":"週 5 天推拉腿分化",
+    cardio: level==="初學者"?"週 2 次，每次 20 分鐘低強度有氧":"週 2–3 次，每次 30 分鐘中強度有氧",
+    note:   bfPct>25?"體脂偏高，建議先以微量盈餘 (+150kcal) 緩慢增肌":"體脂正常，可標準盈餘 +300kcal 穩定增肌",
+  };
+};
+
+/* ── Quick Picks ── */
+const getQuickPicks = gap => {
+  if(gap<=0)  return {label:"🎉 蛋白質已達標！",color:"#CCFF00",
+    items:["恭喜完成今日蛋白質目標！","補充碳水：地瓜或飯糰維持熱量","睡前希臘優格鞏固成果"],total:"繼續保持！"};
+  if(gap<=20) return {label:`缺口 ${gap}g — 輕鬆補`,color:"#FF9500",
+    items:["茶葉蛋 x2（蛋白質 13g）","無糖豆漿 250ml（蛋白質 8g）"],total:`約補 21g，目標達成！`};
+  if(gap<=50) return {label:`缺口 ${gap}g — 認真補`,color:"#FF9500",
+    items:["義式雞胸肉 x1（22g）","無糖黑豆漿 500ml（15g）","茶葉蛋 x2（13g）"],total:`約補 50g 蛋白質`};
+  return {label:`缺口 ${gap}g — 緊急補救`,color:"#FF4444",
+    items:["義式雞胸肉 x2（44g）","希臘優格（14g）","水煮蛋 x3（18g）","無糖黑豆漿（15g）"],
+    total:`約補 91g，明天分散補充`};
+};
+
+const buildOrder = (tdee,goal,prot,gender)=>({
+  calories:[`目標攝取 ${goal} kcal（TDEE ${tdee} + 300 增肌盈餘）`,"分 4–5 餐，每餐間隔不超過 4 小時","訓練後 30 分鐘內補充碳水 + 蛋白質"],
+  protein: [`全天蛋白質目標：${prot}g`,`每餐至少 ${Math.round(prot/5)}–${Math.round(prot/4)}g 蛋白質`,gender==="male"?"優先：雞胸、鮪魚、雞蛋、豆漿":"優先：雞胸、水煮蛋、希臘優格、豆腐"],
+  lifestyle:["今日喝水目標：體重 × 35ml","睡眠 7–8 小時，生長激素主要在深睡期分泌","訓練後冰敷或拉伸 10 分鐘，加速恢復"],
 });
 
-/* Convenience store quick picks by gap */
-const getQuickPicks = (gap) => {
-  if (gap <= 0) return {
-    label:"蛋白質已達標 🎉",
-    items:["恭喜！今日蛋白質目標已完成","可補充碳水：地瓜、飯糰維持熱量","睡前可喝一杯希臘優格鞏固成果"],
-    total:"繼續保持明天的節奏！"
-  };
-  if (gap <= 20) return {
-    label:`還差 ${gap}g 蛋白質 — 小補一下`,
-    items:["茶葉蛋 x2（蛋白質 13g）","無糖豆漿 250ml（蛋白質 8g）","水煮毛豆 1 包（蛋白質 7g）"],
-    total:`共補充約 ${Math.min(gap+5,30)}g 蛋白質`
-  };
-  if (gap <= 50) return {
-    label:`還差 ${gap}g 蛋白質 — 認真補`,
-    items:["義式雞胸肉 1 包（蛋白質 22g）","無糖豆漿 500ml（蛋白質 15g）","茶葉蛋 x2（蛋白質 13g）"],
-    total:`共補充約 50g 蛋白質`
-  };
-  return {
-    label:`還差 ${gap}g 蛋白質 — 緊急補救`,
-    items:["義式雞胸肉 x2（蛋白質 44g）","希臘優格 1 杯（蛋白質 14g）","水煮蛋 x3（蛋白質 18g）","無糖豆漿 500ml（蛋白質 15g）"],
-    total:`共補充約 91g 蛋白質，明天記得分散補充`
-  };
+/* ── localStorage ── */
+const loadData = ()=>{
+  try{
+    const r=localStorage.getItem(LS_KEY);
+    if(!r) return {logs:[],streak:0,lastDate:""};
+    const d=JSON.parse(r);
+    return {logs:Array.isArray(d.logs)?d.logs:[],streak:typeof d.streak==="number"?d.streak:0,lastDate:d.lastDate||""};
+  }catch{return {logs:[],streak:0,lastDate:""};}
+};
+const saveData=d=>{try{localStorage.setItem(LS_KEY,JSON.stringify(d))}catch{}};
+
+const isoToday=()=>new Date().toISOString().slice(0,10);
+const isoLabel=iso=>{const[,m,d]=iso.split("-");return `${m}/${d}`;};
+const computeStreak=logs=>{
+  if(!logs.length) return 0;
+  const sorted=[...logs].sort((a,b)=>b.date.localeCompare(a.date));
+  let count=0,cur=new Date();cur.setHours(0,0,0,0);
+  for(const l of sorted){
+    const ld=new Date(l.date+"T00:00:00");
+    const diff=Math.round((cur-ld)/86400000);
+    if(diff<=1){count++;cur=ld;}else break;
+  }
+  return count;
 };
 
-/* ── localStorage helpers ── */
-const loadData = () => {
-  try {
-    const r = localStorage.getItem(LS_KEY);
-    if (!r) return { logs:[], streak:0, lastDate:"" };
-    const d = JSON.parse(r);
-    return {
-      logs:    Array.isArray(d.logs) ? d.logs : [],
-      streak:  typeof d.streak === "number" ? d.streak : 0,
-      lastDate:typeof d.lastDate === "string" ? d.lastDate : "",
-    };
-  } catch { return { logs:[], streak:0, lastDate:"" }; }
-};
-const saveData = (data) => {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
-};
-const isoToday = () => new Date().toISOString().slice(0,10);
-const isoLabel = iso => { const [,m,d]=iso.split("-"); return `${m}/${d}`; };
-
-/* ══════════════════════════════════
-   RIPPLE HOOK
-══════════════════════════════════ */
-function useRipple() {
-  const ref = useRef(null);
-  const trigger = useCallback((e) => {
-    const el = ref.current; if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const r = document.createElement("span");
-    const size = Math.max(rect.width, rect.height);
-    r.className = "ripple-effect";
-    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
-    el.appendChild(r);
-    setTimeout(()=>r.remove(), 600);
-  }, []);
-  return [ref, trigger];
+/* ══════════════════════════════════════════
+   HOOKS
+══════════════════════════════════════════ */
+function useRipple(){
+  const ref=useRef(null);
+  const fire=useCallback(e=>{
+    const el=ref.current;if(!el)return;
+    const rect=el.getBoundingClientRect();
+    const size=Math.max(rect.width,rect.height);
+    const dot=document.createElement("span");
+    dot.className="ripple-dot";
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+    const cy=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+    dot.style.cssText=`width:${size}px;height:${size}px;left:${cx-size/2}px;top:${cy-size/2}px`;
+    el.appendChild(dot);setTimeout(()=>dot.remove(),600);
+  },[]);
+  return [ref,fire];
 }
 
-/* ══════════════════════════════════
-   TOAST
-══════════════════════════════════ */
-function Toast({ msg, onDone }) {
-  const [out, setOut] = useState(false);
+/* ══════════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════════ */
+
+/* Toast */
+function Toast({msg,onDone}){
+  const [out,setOut]=useState(false);
+  useEffect(()=>{const t1=setTimeout(()=>setOut(true),2900);const t2=setTimeout(onDone,3300);return()=>{clearTimeout(t1);clearTimeout(t2);};},[]);
+  return(
+    <div className={out?"toast-out":"toast-in"} style={{position:"fixed",bottom:96,left:"50%",background:"#0e0e0e",border:"1.5px solid #CCFF00",borderRadius:14,padding:"13px 18px",maxWidth:320,width:"88%",fontSize:13,color:"#e8e8e8",lineHeight:1.75,zIndex:9999,boxShadow:"0 0 30px #ccff0040"}}>
+      <span style={{color:"#CCFF00",fontWeight:900,marginRight:6}}>💬</span>{msg}
+    </div>
+  );
+}
+
+/* Premium Modal */
+function PremiumModal({feature,onClose}){
+  const [calcRef,calcRipple]=useRipple();
+  return(
+    <div className="modal-bg anim-in" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className="modal-box card-reveal">
+        <button onClick={onClose} style={{position:"absolute",top:14,right:16,background:"none",border:"none",color:"#555",fontSize:20,cursor:"pointer"}}>✕</button>
+        <div style={{textAlign:"center",marginBottom:20}}>
+          <div style={{fontSize:36,marginBottom:8}}>🔐</div>
+          <div style={{fontSize:11,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontWeight:900,letterSpacing:3,marginBottom:8}}>PREMIUM FEATURE</div>
+          <div style={{fontSize:20,fontWeight:900,color:"#fff",marginBottom:6}}>{feature}</div>
+          <div style={{height:1,background:"linear-gradient(90deg,transparent,#FFD70066,transparent)",margin:"12px 0"}}/>
+          <div style={{fontSize:14,color:"#888",lineHeight:1.9}}>
+            這個功能需要<span style={{color:"#FFD700",fontWeight:800}}>完整版</span>才能解鎖<br/>
+            <span style={{fontSize:20,fontWeight:900,color:"#fff"}}>一頓飯的錢</span>，換取<br/>
+            <span style={{color:"#CCFF00",fontWeight:800}}>一整年的身材逆襲</span>
+          </div>
+        </div>
+        {["✅ 30天數據趨勢圖 + 智能分析","✅ 12 週訓練課表（PDF 下載）","✅ 50+ 超商增肌私藏配餐清單","✅ 一對一 AI 教練諮詢（無限次）","✅ 所有未來更新永久免費"].map((f,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #1a1a1a"}}>
+            <span style={{fontSize:12,color:"#ccc"}}>{f}</span>
+          </div>
+        ))}
+        <div style={{textAlign:"center",margin:"18px 0 6px"}}>
+          <div style={{fontSize:13,color:"#555",textDecoration:"line-through",marginBottom:2}}>原價 NT$499</div>
+          <div style={{fontSize:32,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>NT$199</div>
+          <div style={{fontSize:11,color:"#FF4444",fontWeight:700,marginBottom:16}}>⚡ 限時特價，隨時恢復原價</div>
+        </div>
+        <button ref={calcRef} onClick={e=>{calcRipple(e);window.open(LINKTREE_URL,"_blank");}} className="glow-flame ripple-host" style={{width:"100%",padding:16,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:12,cursor:"pointer",fontSize:16,fontWeight:900,color:"#000",WebkitTapHighlightColor:"transparent"}}>
+          🔓 立即解鎖完整版 NT$199
+        </button>
+        <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#444"}}>一次購買 · 終身更新 · 大衛教練保證</div>
+      </div>
+    </div>
+  );
+}
+
+/* Streak Bar */
+function StreakBar({streak,logCount}){
+  const pct=Math.min((streak/30)*100,100);
+  const isFlame=streak>=7;
+  return(
+    <div style={{background:"#0a0a0a",borderRadius:14,padding:16,border:"1px solid #ccff0018",marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <div style={{fontSize:12,fontWeight:800,color:isFlame?"#ffdd00":"#CCFF00",letterSpacing:.5}}>{isFlame?"🔥":"⚡"} {streak} 天連續逆襲</div>
+        <div style={{fontSize:11,color:"#444"}}>{logCount}/{MAX_DAYS} 天</div>
+      </div>
+      <div style={{height:7,background:"#1a1a1a",borderRadius:4,overflow:"hidden"}}>
+        <div className="bar-fill" style={{"--w":`${pct}%`,height:"100%",borderRadius:4,background:isFlame?"linear-gradient(90deg,#ff8800,#ffdd00,#ff8800)":"linear-gradient(90deg,#CCFF00,#aaee00)"}}/>
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:9}}>
+        {[7,14,21,30].map(m=>{
+          const done=streak>=m;
+          return(
+            <div key={m} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+              <div style={{width:20,height:20,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,background:done?"#CCFF00":"#1f1f1f",color:done?"#000":"#333",border:`1.5px solid ${done?"#CCFF00":"#2a2a2a"}`}}>{done?"✓":m}</div>
+              <div style={{fontSize:9,color:done?"#CCFF00":"#333"}}>{m}天</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* Achievement */
+function AchievementBadge({streak}){
+  const cfg=
+    streak>=30?{icon:"👑",label:"增肌傳說",   sub:"30天全勤・大衛教練認證",  clr:"#FFD700"}:
+    streak>=21?{icon:"🏆",label:"三週勇士",   sub:"意志力超越 95% 的人",      clr:"#FF9500"}:
+    streak>=14?{icon:"💎",label:"雙週挑戰者", sub:"習慣已成型・繼續衝！",     clr:"#00BFFF"}:
+    streak>=7 ?{icon:"🔥",label:"黃金火焰",   sub:"7天解鎖・燃燒模式啟動！",  clr:"#ffdd00"}:
+    streak>=3 ?{icon:"⚡",label:"初醒戰士",   sub:"好的開始！大衛教練見證你", clr:"#CCFF00"}:null;
+  if(!cfg) return null;
+  return(
+    <div className="badge-pop" style={{display:"flex",alignItems:"center",gap:12,background:`linear-gradient(135deg,${cfg.clr}18,${cfg.clr}06)`,border:`1.5px solid ${cfg.clr}55`,borderRadius:12,padding:"10px 14px",marginBottom:12}}>
+      <div style={{fontSize:28,flexShrink:0}}>{cfg.icon}</div>
+      <div>
+        <div style={{fontSize:14,fontWeight:900,color:cfg.clr}}>{cfg.label}</div>
+        <div style={{fontSize:11,color:"#555",marginTop:2}}>{cfg.sub}</div>
+      </div>
+    </div>
+  );
+}
+
+/* Share Card */
+function ShareCard({res,streak}){
+  const today=new Date().toLocaleDateString("zh-TW",{month:"long",day:"numeric"});
+  return(
+    <div className="share-card card-reveal" style={{marginTop:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+        <div>
+          <div style={{fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:2}}>COACH DAVID</div>
+          <div style={{fontSize:19,fontWeight:900,color:"#fff"}}>今日增肌任務卡</div>
+          <div style={{fontSize:11,color:"#444",marginTop:2}}>{today}</div>
+        </div>
+        <div style={{background:"#CCFF00",borderRadius:9,padding:"5px 11px",fontSize:12,fontWeight:900,color:"#000"}}>v4.0</div>
+      </div>
+      <div style={{height:1,background:"linear-gradient(90deg,#CCFF00,transparent)",marginBottom:14}}/>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:13}}>
+        {[["🔥 TDEE",res.tdee,"kcal","#CCFF00"],["🎯 增肌目標",res.goal,"kcal","#00BFFF"],["💪 蛋白質",res.prot,"g","#FF9500"],["📊 BMI",res.bmi,"","#FF4488"]].map(([l,v,u,c])=>(
+          <div key={l} style={{background:"rgba(255,255,255,.03)",borderRadius:9,padding:"11px 9px",border:`1px solid ${c}22`}}>
+            <div style={{fontSize:10,color:"#444",marginBottom:3}}>{l}</div>
+            <div style={{fontSize:23,fontWeight:900,color:c,lineHeight:1}}>{v}<span style={{fontSize:10,color:"#333",marginLeft:2}}>{u}</span></div>
+          </div>
+        ))}
+      </div>
+      {streak>0&&(
+        <div style={{display:"flex",alignItems:"center",gap:10,background:streak>=7?"linear-gradient(135deg,#ffaa0015,#ffdd0008)":"rgba(204,255,0,.05)",border:`1px solid ${streak>=7?"#ffaa0040":"#ccff0025"}`,borderRadius:9,padding:"9px 12px",marginBottom:12}}>
+          <span style={{fontSize:20}}>{streak>=7?"🔥":"⚡"}</span>
+          <div>
+            <div style={{fontSize:12,fontWeight:800,color:streak>=7?"#ffdd00":"#CCFF00"}}>{streak} 天連續逆襲！</div>
+            <div style={{fontSize:10,color:"#444"}}>大衛教練見證你的蛻變</div>
+          </div>
+        </div>
+      )}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{fontSize:11,color:"#333",letterSpacing:1}}>@coach_david_muscle</div>
+        <div style={{fontSize:9,color:"#222",letterSpacing:2}}>AI MUSCLE v4.0</div>
+      </div>
+      <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"#333",letterSpacing:1}}>長按截圖，分享至 IG Story 🚀</div>
+    </div>
+  );
+}
+
+/* Monthly Report */
+function MonthlyReport({logs,targetProt,onPremium}){
+  if(logs.length<3) return null;
+  const avg=k=>Math.round(logs.reduce((s,l)=>s+l[k],0)/logs.length);
+  const hit=targetProt?logs.filter(l=>l.prot>=targetProt).length:0;
+  const rate=targetProt?Math.round((hit/logs.length)*100):null;
+  const rc=rate===null?"#888":rate>=80?"#CCFF00":rate>=50?"#FF9500":"#FF4444";
+  const grade=!rate?{i:"📊",t:"持續記錄中，分析趨勢中…"}:rate>=80?{i:"🏆",t:`達標率 ${rate}%！習慣已養成！`}:rate>=50?{i:"📈",t:`達標率 ${rate}%，先確保早餐蛋白質到位。`}:{i:"⚠️",t:`達標率 ${rate}%。意識到問題就贏了一半。`};
+  return(
+    <div style={{background:"#0a0a0a",borderRadius:14,padding:16,marginTop:14,border:"1.5px solid #ccff0022"}}>
+      <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:13}}>📅 月度評估（{logs.length} 天）</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+        {[["均 TDEE",avg("tdee"),"kcal","#00BFFF"],["均蛋白質",avg("prot"),"g","#FF9500"],["達標率",rate!==null?`${rate}%`:"—","",rc]].map(([l,v,u,c])=>(
+          <div key={l} style={{background:"#111",borderRadius:10,padding:"10px 8px",border:`1px solid ${c}22`,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}}/>
+            <div style={{fontSize:9,color:"#444",letterSpacing:1.2,marginBottom:5}}>{l}</div>
+            <div style={{fontSize:20,fontWeight:900,color:c,lineHeight:1}}>{v}</div>
+            <div style={{fontSize:9,color:"#333",marginTop:2}}>{u}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{background:"#111",borderRadius:10,padding:"11px 13px",borderLeft:"3px solid #CCFF00",marginBottom:12}}>
+        <span style={{fontSize:14,marginRight:8}}>{grade.i}</span>
+        <span style={{fontSize:12,color:"#bbb",lineHeight:1.8}}>{grade.t}</span>
+      </div>
+      {/* Premium locked: trend chart */}
+      <button onClick={()=>onPremium("30 天數據趨勢圖")} style={{width:"100%",padding:"12px 0",background:"linear-gradient(135deg,#FFD70018,#FF880010)",border:"1px solid #FFD70044",borderRadius:10,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,WebkitTapHighlightColor:"transparent"}}>
+        <span style={{fontSize:14}}>📈</span>
+        <span style={{fontSize:13,fontWeight:800,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>解鎖 30 天趨勢圖表</span>
+        <span style={{fontSize:10,background:"linear-gradient(135deg,#FFD700,#FF8800)",color:"transparent",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontWeight:900}}>🔐 PREMIUM</span>
+      </button>
+    </div>
+  );
+}
+
+/* ── AI Chat Interface ── */
+const AI_QUICK_ACTIONS = [
+  {label:"熱量缺口補救",   kcal:300, prot:0  },
+  {label:"蛋白質嚴重不足", kcal:0,   prot:40 },
+  {label:"訓練後補充",     kcal:400, prot:30 },
+  {label:"今日全面補救",   kcal:500, prot:50 },
+];
+
+function AIChat({res}){
+  const [msgs,   setMsgs]   = useState([]);
+  const [kcalIn, setKcalIn] = useState("");
+  const [protIn, setProtIn] = useState("");
+  const [typing, setTyping] = useState(false);
+  const bottomRef            = useRef(null);
+
   useEffect(()=>{
-    const t1=setTimeout(()=>setOut(true),2800);
-    const t2=setTimeout(()=>onDone(),3200);
-    return()=>{clearTimeout(t1);clearTimeout(t2)};
+    setMsgs([{from:"coach",text:"嗨！我是大衛教練的 AI 助手 💪 告訴我你今天的熱量或蛋白質缺口，我立刻幫你找出最佳補充方案。也可以直接點下方快捷鍵！"}]);
   },[]);
-  return (
-    <div className={out?"toast-out":"toast-in"} style={{
-      position:"fixed",bottom:90,left:"50%",
-      background:"#0f0f0f",border:"1.5px solid #CCFF00",
-      borderRadius:14,padding:"14px 18px",maxWidth:330,width:"88%",
-      fontSize:13,color:"#eee",lineHeight:1.75,zIndex:9999,
-      boxShadow:"0 0 30px #ccff0040"
-    }}>
-      <span style={{color:"#CCFF00",
+
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[msgs,typing]);
+
+  const sendQuery=(kcalGap,protGap,label)=>{
+    const userMsg=label||`熱量缺口 ${kcalGap||0}kcal，蛋白質缺口 ${protGap||0}g`;
+    setMsgs(m=>[...m,{from:"user",text:userMsg}]);
+    setTyping(true);
+    setTimeout(()=>{
+      const match=aiMatch(kcalGap,protGap);
+      const itemList=match.items.map(f=>`${f[0]}（${f[1]}kcal / 蛋白質 ${f[2]}g，${f[3]}）`).join("\n");
+      setMsgs(m=>[...m,{from:"coach",text:`大衛教練推薦方案 ✅\n\n${itemList}\n\n📊 合計：約 ${match.totalKcal}kcal、蛋白質 ${match.totalProt}g\n\n以上都可以在超商買到，執行起來！💪`}]);
+      setTyping(false);
+    },1200);
+  };
+
+  const handleSend=()=>{
+    const k=parseFloat(kcalIn)||0;
+    const p=parseFloat(protIn)||0;
+    if(!k&&!p){return;}
+    sendQuery(k,p);
+    setKcalIn(""); setProtIn("");
+  };
+
+  return(
+    <div style={{background:"#0a0a0a",borderRadius:14,border:"1.5px solid #ccff0028",overflow:"hidden",marginBottom:12}}>
+      {/* header */}
+      <div style={{padding:"12px 16px",borderBottom:"1px solid #1a1a1a",display:"flex",alignItems:"center",gap:10}}>
+        <div style={{width:32,height:32,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🤖</div>
+        <div>
+          <div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>AI 教練決策助手</div>
+          <div style={{fontSize:10,color:"#444"}}>輸入缺口，立即獲得超商補充方案</div>
+        </div>
+        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5}}>
+          <div style={{width:7,height:7,borderRadius:"50%",background:"#CCFF00",animation:"breatheGreen 2s ease-in-out infinite"}}/>
+          <span style={{fontSize:10,color:"#CCFF00"}}>線上</span>
+        </div>
+      </div>
+
+      {/* messages */}
+      <div style={{height:220,overflowY:"auto",padding:"14px 14px 6px",display:"flex",flexDirection:"column",gap:10}}>
+        {msgs.map((m,i)=>(
+          <div key={i} className="chat-bubble" style={{display:"flex",justifyContent:m.from==="user"?"flex-end":"flex-start"}}>
+            {m.from==="coach"&&<div style={{width:26,height:26,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginRight:8,alignSelf:"flex-end"}}>🤖</div>}
+            <div style={{
+              maxWidth:"80%",padding:"10px 13px",borderRadius:m.from==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",
+              background:m.from==="user"?"#CCFF00":"#161616",
+              color:m.from==="user"?"#000":"#ccc",
+              fontSize:12,lineHeight:1.75,fontWeight:m.from==="user"?700:400,
+              whiteSpace:"pre-wrap",
+              border:m.from==="coach"?"1px solid #ccff0020":"none",
+            }}>{m.text}</div>
+          </div>
+        ))}
+        {typing&&(
+          <div className="chat-bubble" style={{display:"flex",alignItems:"flex-end",gap:8}}>
+            <div style={{width:26,height:26,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
+            <div style={{background:"#161616",borderRadius:"14px 14px 14px 4px",padding:"10px 14px",border:"1px solid #ccff0020"}}>
+              <div style={{display:"flex",gap:4}}>
+                {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"#CCFF00",animation:`quotePulse 1.2s ease-in-out ${i*0.2}s infinite`}}/>)}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef}/>
+      </div>
+
+      {/* quick actions */}
+      <div style={{padding:"8px 14px",borderTop:"1px solid #1a1a1a",display:"flex",gap:6,flexWrap:"wrap"}}>
+        {AI_QUICK_ACTIONS.map(a=>(
+          <button key={a.label} onClick={()=>sendQuery(a.kcal,a.prot,a.label)} style={{padding:"6px 10px",background:"#161616",border:"1px solid #ccff0030",borderRadius:20,cursor:"pointer",fontSize:11,color:"#CCFF00",fontWeight:700,WebkitTapHighlightColor:"transparent"}}>
+            {a.label}
+          </button>
+        ))}
+      </div>
+
+      {/* input */}
+      <div style={{padding:"10px 14px",borderTop:"1px solid #1a1a1a",display:"flex",gap:8,alignItems:"center"}}>
+        <div style={{flex:1,display:"flex",gap:6}}>
+          <input type="number" value={kcalIn} onChange={e=>setKcalIn(e.target.value)} placeholder="熱量缺口 kcal"
+            style={{flex:1,background:"#161616",border:"1px solid #2a2a2a",borderRadius:8,color:"#fff",padding:"9px 10px",fontSize:12,fontFamily:"inherit",minWidth:0}}/>
+          <input type="number" value={protIn} onChange={e=>setProtIn(e.target.value)} placeholder="蛋白質缺口 g"
+            style={{flex:1,background:"#161616",border:"1px solid #2a2a2a",borderRadius:8,color:"#fff",padding:"9px 10px",fontSize:12,fontFamily:"inherit",minWidth:0}}/>
+        </div>
+        <button onClick={handleSend} style={{padding:"9px 14px",background:"#CCFF00",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000",flexShrink:0,WebkitTapHighlightColor:"transparent"}}>送出</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Newbie Mistake Carousel ── */
+function MistakeCarousel(){
+  const [idx,setIdx]=useState(0);
+  const item=NEWBIE_MISTAKES[idx];
+  return(
+    <div style={{background:"#0a0a0a",borderRadius:14,padding:16,border:"1px solid #ff444422",marginBottom:12}}>
+      <div style={{fontSize:12,fontWeight:900,color:"#FF4444",marginBottom:12,letterSpacing:.5}}>🚨 新手必避五大坑（{idx+1}/5）</div>
+      <div className="anim-in" key={idx} style={{background:"#0f0f0f",borderRadius:12,padding:"14px 14px",borderLeft:"3px solid #FF4444",marginBottom:12}}>
+        <div style={{fontSize:14,fontWeight:800,color:"#fff",marginBottom:6}}>{item.icon} {item.title}</div>
+        <div style={{fontSize:12,color:"#888",lineHeight:1.8}}>{item.desc}</div>
+      </div>
+      <div style={{display:"flex",gap:6,justifyContent:"center"}}>
+        {NEWBIE_MISTAKES.map((_,i)=>(
+          <button key={i} onClick={()=>setIdx(i)} style={{width:i===idx?22:8,height:8,borderRadius:4,border:"none",cursor:"pointer",transition:"all .3s",background:i===idx?"#CCFF00":"#333",padding:0,WebkitTapHighlightColor:"transparent"}}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Food Red/Black Board ── */
+function FoodBoard(){
+  const [tab,setTab]=useState("black");
+  const list=tab==="black"?FOOD_BLACKLIST:FOOD_WHITELIST;
+  return(
+    <div style={{background:"#0a0a0a",borderRadius:14,border:"1px solid #ccff0018",overflow:"hidden",marginBottom:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
+        {[["black","🚫 地雷榜","#FF4444"],["white","✅ 神隊友榜","#CCFF00"]].map(([t,l,c])=>(
+          <button key={t} onClick={()=>setTab(t)} style={{padding:"11px 0",border:"none",cursor:"pointer",fontSize:12,fontWeight:800,transition:"all .2s",background:tab===t?c:"transparent",color:tab===t?"#000":c,WebkitTapHighlightColor:"transparent"}}>{l}</button>
+        ))}
+      </div>
+      <div style={{padding:"14px 14px"}}>
+        {list.map((f,i)=>(
+          <div key={i} className="anim-in" style={{display:"flex",gap:10,padding:"10px 0",borderBottom:i<list.length-1?"1px solid #111":"none"}}>
+            <span style={{fontSize:18,flexShrink:0}}>{f.icon}</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:800,color:"#ddd",marginBottom:3}}>{f.name}</div>
+              <div style={{fontSize:11,color:"#666",lineHeight:1.65}}>{f.why}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Golden Ratio Panel ── */
+function GoldenRatio({res,gender,streak}){
+  if(!res) return null;
+  const bf=estimateBF(gender,parseFloat(res.bmi),res.age||25);
+  const vol=trainingVol(streak,bf);
+  const leanMass=res.weight?(res.weight*(1-bf/100)).toFixed(1):null;
+  return(
+    <div style={{background:"#0a0a0a",borderRadius:14,padding:16,border:"1.5px solid #ccff0028",marginBottom:12}}>
+      <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:14,letterSpacing:.5}}>⚖️ 黃金比例 & 訓練容量建議</div>
+      {/* body comp */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}>
+        {[
+          ["估算體脂率",`${bf}%`,"#FF9500"],
+          ["去脂體重",leanMass?`${leanMass}kg`:"—","#00BFFF"],
+          ["訓練等級",vol.level,"#CCFF00"],
+          ["每週訓練",vol.freq.split(" ")[1]+" "+vol.freq.split(" ")[2],"#FF4488"],
+        ].map(([l,v,c])=>(
+          <div key={l} style={{background:"#111",borderRadius:10,padding:"10px 10px",border:`1px solid ${c}22`,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}}/>
+            <div style={{fontSize:9,color:"#444",letterSpacing:1.2,marginBottom:5}}>{l}</div>
+            <div style={{fontSize:18,fontWeight:900,color:c,lineHeight:1}}>{v}</div>
+          </div>
+        ))}
+      </div>
+      {/* training recs */}
+      {[["💪 訓練組數",vol.sets],["📅 訓練頻率",vol.freq],["🏃 有氧建議",vol.cardio],["🎯 教練建議",vol.note]].map(([l,v])=>(
+        <div key={l} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:"1px solid #111",alignItems:"flex-start"}}>
+          <div style={{fontSize:11,color:"#CCFF00",fontWeight:700,flexShrink:0,minWidth:70}}>{l}</div>
+          <div style={{fontSize:12,color:"#888",lineHeight:1.7}}>{v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
+   MAIN APP
+════════════════════════════════════════════ */
+function App(){
+  /* form */
+  const [tab,    setTab]    = useState("calc");
+  const [gender, setGender] = useState("male");
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
+  const [age,    setAge]    = useState("");
+  const [act,    setAct]    = useState(1.55);
+  /* results */
+  const [res,       setRes]       = useState(null);
+  const [animKey,   setAnimKey]   = useState(0);
+  const [showPicks, setShowPicks] = useState(false);
+  const [protInput, setProtInput] = useState("");
+  const [showShare, setShowShare] = useState(false);
+  /* persist */
+  const [logs,   setLogs]   = useState([]);
+  const [streak, setStreak] = useState(0);
+  const [saved,  setSaved]  = useState(false);
+  /* ui */
+  const [toast,      setToast]      = useState(null);
+  const [premiumFeature, setPremium] = useState(null);
+  const [quote] = useState(()=>QUOTES[Math.floor(Math.random()*QUOTES.length)]);
+  /* ripple */
+  const [calcRef,calcRipple] = useRipple();
+  const [saveRef,saveRipple] = useRipple();
+
+  useEffect(()=>{
+    const d=loadData();
+    setLogs(d.logs);
+    setStreak(computeStreak(d.logs));
+  },[]);
+
+  /* ── handlers ── */
+  const handleCalc=e=>{
+    calcRipple(e);
+    const w=parseFloat(weight),h=parseFloat(height),a=parseInt(age);
+    if(!w||!h||!a||w<20||h<100||a<10){setToast("請確認體重（≥20kg）、身高（≥100cm）、年齡（≥10）都已填寫！");return;}
+    const bmr=gender==="male"?88.362+13.397*w+4.799*h-5.677*a:447.593+9.247*w+3.098*h-4.330*a;
+    const tdee=Math.round(bmr*act);
+    const lvl=tdee<1800?"low":tdee<2500?"medium":"high";
+    setRes({tdee,goal:tdee+300,bmi:(w/((h/100)**2)).toFixed(1),prot:Math.round(w*1.8),weight:w,age:a,comment:COACH_COMMENTS[gender][lvl],order:buildOrder(tdee,tdee+300,Math.round(w*1.8),gender)});
+    setAnimKey(k=>k+1);setSaved(false);setShowPicks(false);setShowShare(false);setProtInput("");
+  };
+
+  const handleSave=e=>{
+    saveRipple(e);
+    if(!res)return;
+    const today=isoToday();
+    const prev=loadData().logs.filter(l=>l.date!==today);
+    const next=[{date:today,label:isoLabel(today),tdee:res.tdee,goal:res.goal,prot:res.prot},...prev].slice(0,MAX_DAYS);
+    const st=computeStreak(next);
+    saveData({logs:next,streak:st,lastDate:today});
+    setLogs(next);setStreak(st);setSaved(true);
+    setToast(st>=7?`🔥 第 ${st} 天！黃金火焰燃燒中——你現在是前 5% 的人！`:`✅ 戰果回報完成！大衛教練提醒：水分也要補足 💧`);
+  };
+
+  const handleClear=()=>{
+    localStorage.removeItem(LS_KEY);
+    setLogs([]);setStreak(0);setSaved(false);
+    setToast("重新開機完成！明天是大衛教練帶你變強的新開始 💪");
+  };
+
+  /* derived */
+  const isFlame  = streak>=7;
+  const ctaClass = isFlame?"glow-flame ripple-host":"glow-green ripple-host";
+  const eaten    = parseFloat(protInput)||0;
+  const gap      = res?Math.max(0,res.prot-eaten):0;
+  const picks    = res?getQuickPicks(gap):null;
+
+  /* styles */
+  const C = {
+    card:{background:"#0d0d0d",borderRadius:14,padding:16,marginBottom:12,border:"1.5px solid #ccff0018"},
+    lbl: {fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:10,display:"block"},
+    tap: {WebkitTapHighlightColor:"transparent"},
+  };
+
+  return(
+    <div style={{background:"#000",minHeight:"100vh"}}>
+      {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+      {premiumFeature&&<PremiumModal feature={premiumFeature} onClose={()=>setPremium(null)}/>}
+
+      <div style={{maxWidth:480,margin:"0 auto"}}>
+
+        {/* ───── HEADER ───── */}
+        <div style={{background:"linear-gradient(180deg,#111 0%,#000 100%)",borderBottom:"1px solid #ccff0018",padding:"18px 16px 14px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+            <div style={{width:46,height:46,flexShrink:0,borderRadius:13,background:"linear-gradient(135deg,#CCFF00,#aaee00)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 0 22px #ccff0050"}}>💪</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:22,fontWeight:900,color:"#CCFF00",letterSpacing:2,lineHeight:1}}>大衛教練</div>
+              <div style={{fontSize:10,color:"#555",letterSpacing:2,marginTop:3}}>AI 增肌決策系統 · v4.0 · 2026</div>
+            </div>
+            {streak>0&&(
+              <div className="badge-pop" style={{flexShrink:0,padding:"5px 10px",borderRadius:20,fontSize:11,fontWeight:800,background:isFlame?"linear-gradient(135deg,#ff8800,#ffdd00)":"#ccff0022",color:isFlame?"#000":"#CCFF00",border:`1px solid ${isFlame?"#ffaa00":"#ccff0040"}`}}>
+                {isFlame?"🔥":"⚡"}{streak}天
+              </div>
+            )}
+          </div>
+          <div className="quote-anim" style={{padding:"10px 14px",background:"#0a0a0a",borderRadius:10,borderLeft:"3px solid #CCFF00",fontSize:12,color:"#666",fontStyle:"italic",lineHeight:1.75}}>{quote}</div>
+          <div style={{height:1,background:"linear-gradient(90deg,#CCFF00,transparent)",marginTop:12}}/>
+        </div>
+
+        {/* ───── TABS ───── */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:5,padding:"11px 14px 0"}}>
+          {[["calc","📊 計算"],["ai","🤖 AI"],["info","📚 資訊"],["dining","🍽️ 外食"]].map(([id,lbl])=>(
+            <button key={id} onClick={()=>setTab(id)} style={{padding:"10px 2px",borderRadius:10,border:tab===id?"none":"1px solid #1f1f1f",cursor:"pointer",fontSize:11,fontWeight:800,letterSpacing:.3,transition:"all .2s",background:tab===id?"#CCFF00":"transparent",color:tab===id?"#000":"#555",...C.tap}}>{lbl}</button>
+          ))}
+        </div>
+
+        <div style={{padding:"14px 16px 130px"}}>
+
+          {/* ════════ TAB: CALC ════════ */}
+          {tab==="calc"&&(
+            <div>
+              {(logs.length>0||streak>0)&&<StreakBar streak={streak} logCount={logs.length}/>}
+              {streak>0&&<AchievementBadge streak={streak}/>}
+
+              {/* gender */}
+              <div style={C.card}>
+                <span style={C.lbl}>性別 GENDER</span>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                  {[["male","♂ 男性"],["female","♀ 女性"]].map(([v,l])=>(
+                    <button key={v} onClick={()=>setGender(v)} style={{padding:"13px 0",borderRadius:10,border:"none",cursor:"pointer",fontSize:15,fontWeight:800,letterSpacing:1,transition:"all .2s",background:gender===v?"#CCFF00":"#1a1a1a",color:gender===v?"#000":"#555",boxShadow:gender===v?"0 0 20px #ccff0055":"none",...C.tap}}>{l}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* stats */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+                {[["體重","kg",weight,setWeight,"70"],["身高","cm",height,setHeight,"175"],["年齡","歲",age,setAge,"25"]].map(([l,u,v,s,ph])=>(
+                  <div key={l} style={{...C.card,marginBottom:0}}>
+                    <span style={C.lbl}>{l}</span>
+                    <input type="number" value={v} onChange={e=>s(e.target.value)} placeholder={ph} style={{width:"100%",background:"transparent",border:"none",color:"#fff",fontSize:26,fontWeight:800,fontFamily:"inherit"}}/>
+                    <div style={{fontSize:11,color:"#444",marginTop:2}}>{u}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* activity */}
+              <div style={C.card}>
+                <span style={C.lbl}>活動係數 ACTIVITY</span>
+                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                  {ACTIVITIES.map(o=>(
+                    <button key={o.v} onClick={()=>setAct(o.v)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderRadius:10,border:`1px solid ${act===o.v?"#CCFF00":"#1f1f1f"}`,cursor:"pointer",transition:"all .18s",background:act===o.v?"#ccff0012":"transparent",textAlign:"left",width:"100%",...C.tap}}>
+                      <span style={{fontSize:18,flexShrink:0}}>{o.s}</span>
+                      <span style={{fontSize:13,fontWeight:act===o.v?800:500,color:act===o.v?"#CCFF00":"#555"}}>{o.l}</span>
+                      {act===o.v&&<span style={{marginLeft:"auto",fontSize:13,color:"#CCFF00",fontWeight:900}}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* calc btn */}
+              <button ref={calcRef} onClick={handleCalc} className={ctaClass} style={{width:"100%",padding:18,background:isFlame?"linear-gradient(135deg,#ff8800,#ffdd00)":"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:14,cursor:"pointer",fontSize:16,fontWeight:900,color:"#000",letterSpacing:.5,marginBottom:20,...C.tap}}>
+                {isFlame?"🔥 大衛教練，幫我規劃今日營養！":"🚀 大衛教練，幫我規劃今日營養"}
+              </button>
+
+              {/* results */}
+              {res&&(
+                <div key={animKey} className="anim-up">
+
+                  {/* metrics */}
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+                    {[["TDEE",res.tdee,"kcal/日","#CCFF00"],["增肌目標",res.goal,"kcal/日","#00BFFF"],["蛋白質",res.prot,"g/日","#FF9500"],["BMI",res.bmi,"","#FF4488"]].map(([l,v,u,c])=>(
+                      <div key={l} style={{background:"#0a0a0a",borderRadius:12,padding:16,border:`1.5px solid ${c}28`,position:"relative",overflow:"hidden"}}>
+                        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}}/>
+                        <div style={{fontSize:10,color:"#555",letterSpacing:2,marginBottom:5}}>{l}</div>
+                        <div style={{fontSize:30,fontWeight:900,color:c,lineHeight:1}}>{v}</div>
+                        <div style={{fontSize:11,color:"#333",marginTop:4}}>{u}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* today's order */}
+                  <div style={{...C.card,marginBottom:14,border:"1.5px solid #ccff0030"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+                      <div style={{width:36,height:36,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👨‍💻</div>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:900,color:"#CCFF00"}}>大衛教練今日指令</div>
+                        <div style={{fontSize:10,color:"#444"}}>執行三項任務，逆襲從今天開始</div>
+                      </div>
+                    </div>
+                    {[{icon:"🔥",title:"熱量任務",items:res.order.calories,clr:"#CCFF00"},{icon:"💪",title:"蛋白質任務",items:res.order.protein,clr:"#FF9500"},{icon:"🌙",title:"生活習慣",items:res.order.lifestyle,clr:"#00BFFF"}].map(sec=>(
+                      <div key={sec.title} style={{marginBottom:10,padding:"12px 13px",background:"#111",borderRadius:11,borderLeft:`3px solid ${sec.clr}`}}>
+                        <div style={{fontSize:12,fontWeight:900,color:sec.clr,marginBottom:8}}>{sec.icon} {sec.title}</div>
+                        {sec.items.map((it,i)=>(
+                          <div key={i} style={{display:"flex",gap:8,padding:"4px 0",fontSize:12,color:"#999",lineHeight:1.65}}>
+                            <span style={{color:sec.clr,flexShrink:0}}>▸</span>{it}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    <div style={{fontSize:12,color:"#666",lineHeight:1.8,borderLeft:"3px solid #CCFF00",paddingLeft:12,marginTop:6}}>{res.comment}</div>
+                  </div>
+
+                  {/* golden ratio */}
+                  <GoldenRatio res={res} gender={gender} streak={streak}/>
+
+                  {/* quick picks */}
+                  <div style={{...C.card,marginBottom:14}}>
+                    <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:10}}>🏪 超商補缺口快算</div>
+                    <div style={{fontSize:12,color:"#555",marginBottom:10}}>今天已攝取蛋白質約幾克？</div>
+                    <div style={{display:"flex",gap:8,marginBottom:10,alignItems:"center"}}>
+                      <input type="number" value={protInput} onChange={e=>setProtInput(e.target.value)} placeholder="0" style={{flex:1,background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:10,color:"#fff",padding:"12px 14px",fontSize:18,fontWeight:800,fontFamily:"inherit"}}/>
+                      <span style={{color:"#555",fontSize:13,flexShrink:0}}>g</span>
+                      <button onClick={()=>setShowPicks(true)} className="ripple-host" style={{padding:"12px 16px",background:"#CCFF00",border:"none",borderRadius:10,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000",flexShrink:0,...C.tap}}>幫我配！</button>
+                    </div>
+                    {showPicks&&picks&&(
+                      <div className="anim-up" style={{background:"#0f0f0f",borderRadius:11,padding:14,border:`1px solid ${picks.color}35`}}>
+                        <div style={{fontSize:13,fontWeight:800,color:picks.color,marginBottom:10}}>{picks.label}</div>
+                        {picks.items.map((it,i)=>(
+                          <div key={i} style={{display:"flex",gap:8,padding:"5px 0",fontSize:12,color:"#777",borderBottom:"1px solid #1a1a1a"}}>
+                            <span style={{color:"#CCFF00",flexShrink:0}}>▸</span>{it}
+                          </div>
+                        ))}
+                        <div style={{marginTop:10,fontSize:12,fontWeight:800,color:"#CCFF00"}}>{picks.total}</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* save + share */}
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+                    <button ref={saveRef} onClick={handleSave} className={`ripple-host ${saved?"":"glow-green"}`} style={{padding:14,borderRadius:12,border:`2px solid ${saved?"#CCFF00":"#00BFFF"}`,background:saved?"#CCFF00":"transparent",color:saved?"#000":"#00BFFF",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all .3s",...C.tap}}>
+                      {saved?"✅ 已回報戰果":"✅ 回報戰果"}
+                    </button>
+                    <button onClick={()=>setShowShare(s=>!s)} style={{padding:14,borderRadius:12,border:"2px solid #FF9500",background:"transparent",color:"#FF9500",cursor:"pointer",fontSize:13,fontWeight:800,...C.tap}}>📸 生成任務卡</button>
+                  </div>
+                  {saved&&<div style={{fontSize:11,color:"#444",textAlign:"center",marginBottom:10}}>數據已儲存 · 累積 {logs.length} 天</div>}
+                  {showShare&&<ShareCard res={res} streak={streak}/>}
+
+                  {/* premium locked: training plan */}
+                  <button onClick={()=>setPremium("12 週訓練課表下載")} style={{width:"100%",padding:"13px 0",background:"linear-gradient(135deg,#FFD70015,#FF880010)",border:"1px solid #FFD70040",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:8,...C.tap}}>
+                    <span style={{fontSize:14}}>📋</span>
+                    <span style={{fontSize:13,fontWeight:800,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>下載 12 週訓練課表</span>
+                    <span style={{fontSize:10,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>🔐 PREMIUM</span>
+                  </button>
+                </div>
+              )}
+
+              {/* history */}
+              {logs.length>0&&(
+                <div style={{...C.card,marginTop:8}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                    <div style={{fontSize:13,fontWeight:800,color:"#CCFF00"}}>📅 逆襲紀錄（{logs.length} 天）</div>
+                    <button onClick={handleClear} className="glow-red" style={{padding:"5px 12px",borderRadius:20,border:"1px solid #ff444455",background:"transparent",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",...C.tap}}>🗑 重新開機</button>
+                  </div>
+                  <div className="tbl-scroll">
+                    <table>
+                      <thead><tr>{["日期","TDEE","增肌目標","蛋白質"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                      <tbody>
+                        {logs.map(l=>{
+                          const iT=l.date===isoToday();
+                          return(
+                            <tr key={l.date} style={{background:iT?"#ccff0010":"transparent"}}>
+                              <td style={{fontWeight:700,color:iT?"#CCFF00":"#666"}}>{l.label}{iT&&<span style={{fontSize:9,marginLeft:4,color:"#CCFF00"}}>今</span>}</td>
+                              <td style={{fontWeight:700,color:"#fff"}}>{l.tdee}</td>
+                              <td style={{fontWeight:700,color:"#00BFFF"}}>{l.goal}</td>
+                              <td style={{fontWeight:700,color:"#FF9500"}}>{l.prot}g</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <MonthlyReport logs={logs} targetProt={res?.prot} onPremium={setPremium}/>
+                </div>
+              )}
+
+              {!res&&logs.length===0&&(
+                <div style={{textAlign:"center",padding:"32px 0",color:"#222",fontSize:13,lineHeight:2}}>
+                  ☝️ 填寫數據後點擊計算<br/>大衛教練立刻幫你規劃今日任務
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ════════ TAB: AI ════════ */}
+          {tab==="ai"&&(
+            <div>
+              <div style={{fontSize:12,color:"#555",marginBottom:14,padding:"12px 14px",background:"#0a0a0a",borderRadius:10,borderLeft:"3px solid #CCFF00",lineHeight:1.8}}>
+                🤖 <span style={{color:"#CCFF00",fontWeight:800}}>AI 決策助手</span> — 告訴我你的熱量或蛋白質缺口，我立刻從超商資料庫匹配最佳補充方案。
+              </div>
+              <AIChat res={res}/>
+              {/* quick picks with current data */}
+              {res&&(
+                <div style={{...C.card}}>
+                  <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:10}}>🏪 超商補缺口快算（基於你的數據）</div>
+                  <div style={{fontSize:12,color:"#555",marginBottom:10}}>今天已攝取蛋白質約幾克？</div>
+                  <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}>
+                    <input type="number" value={protInput} onChange={e=>setProtInput(e.target.value)} placeholder="0" style={{flex:1,background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:10,color:"#fff",padding:"12px 14px",fontSize:18,fontWeight:800,fontFamily:"inherit"}}/>
+                    <span style={{color:"#555",fontSize:13}}>g</span>
+                    <button onClick={()=>setShowPicks(true)} className="ripple-host glow-green" style={{padding:"12px 16px",background:"#CCFF00",border:"none",borderRadius:10,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000",flexShrink:0,...C.tap}}>計算缺口</button>
+                  </div>
+                  {showPicks&&picks&&(
+                    <div className="anim-up" style={{background:"#0f0f0f",borderRadius:11,padding:14,border:`1px solid ${picks.color}35`}}>
+                      <div style={{fontSize:13,fontWeight:800,color:picks.color,marginBottom:10}}>{picks.label}</div>
+                      {picks.items.map((it,i)=>(
+                        <div key={i} style={{display:"flex",gap:8,padding:"5px 0",fontSize:12,color:"#777",borderBottom:"1px solid #1a1a1a"}}>
+                          <span style={{color:"#CCFF00",flexShrink:0}}>▸</span>{it}
+                        </div>
+                      ))}
+                      <div style={{marginTop:10,fontSize:12,fontWeight:800,color:"#CCFF00"}}>{picks.total}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {!res&&(
+                <div style={{textAlign:"center",padding:"20px 0",color:"#333",fontSize:13,lineHeight:2}}>
+                  ☝️ 請先到「📊 計算」頁面<br/>完成 TDEE 計算，AI 才能提供個人化建議
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ════════ TAB: INFO ════════ */}
+          {tab==="info"&&(
+            <div>
+              {/* mistakes carousel */}
+              <MistakeCarousel/>
+              {/* food board */}
+              <FoodBoard/>
+              {/* golden ratio (needs res) */}
+              {res?<GoldenRatio res={res} gender={gender} streak={streak}/>:(
+                <div style={{...C.card,textAlign:"center",color:"#333",fontSize:12,lineHeight:2}}>
+                  ⚖️ 黃金比例計算器<br/>請先完成 TDEE 計算以查看體脂率估算與訓練建議
+                </div>
+              )}
+              {/* premium: training plan */}
+              <button onClick={()=>setPremium("12 週訓練課表下載")} style={{width:"100%",padding:"14px 0",background:"linear-gradient(135deg,#FFD70015,#FF880010)",border:"1.5px solid #FFD70044",borderRadius:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:12,...C.tap}}>
+                <span style={{fontSize:18}}>📋</span>
+                <div style={{textAlign:"left"}}>
+                  <div style={{fontSize:14,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>12 週增肌訓練課表</div>
+                  <div style={{fontSize:11,color:"#555"}}>完整週期化訓練計畫 · PDF 下載</div>
+                </div>
+                <span style={{marginLeft:"auto",fontSize:11,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginRight:4}}>🔐 PREMIUM</span>
+              </button>
+              {/* premium: trend chart */}
+              <button onClick={()=>setPremium("30 天數據趨勢圖")} style={{width:"100%",padding:"14px 0",background:"linear-gradient(135deg,#FFD70015,#FF880010)",border:"1.5px solid #FFD70044",borderRadius:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,...C.tap}}>
+                <span style={{fontSize:18}}>📈</span>
+                <div style={{textAlign:"left"}}>
+                  <div style={{fontSize:14,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>30 天數據趨勢圖</div>
+                  <div style={{fontSize:11,color:"#555"}}>視覺化進度追蹤 · 智能分析報告</div>
+                </div>
+                <span style={{marginLeft:"auto",fontSize:11,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginRight:4}}>🔐 PREMIUM</span>
+              </button>
+            </div>
+          )}
+
+          {/* ════════ TAB: DINING ════════ */}
+          {tab==="dining"&&(
+            <div>
+              <div style={{fontSize:12,color:"#555",marginBottom:16,padding:"12px 14px",background:"#0a0a0a",borderRadius:10,borderLeft:"3px solid #CCFF00",lineHeight:1.8}}>
+                🎯 <span style={{color:"#CCFF00",fontWeight:800}}>大衛教練外食生存指南</span> — 掌握規則，外食照樣增肌不踩坑。
+              </div>
+
+              {/* free combos */}
+              {[
+                {store:"7-ELEVEN",color:"#FF3333",icon:"🏪",title:"增肌早餐基礎組",items:["茶葉蛋 x2（156kcal / 蛋白質 13g）","御飯糰 x1 鮪魚（180kcal）","無糖黑豆漿 500ml（90kcal / 蛋白質 15g）"],total:"約 426kcal｜蛋白質 28g",tip:"早餐首選！低脂高蛋白，啟動一天代謝。"},
+                {store:"全家 FamilyMart",color:"#0099FF",icon:"🏬",title:"健身午餐基礎組",items:["FamiChicken 去皮（250kcal / 蛋白質 22g）","關東煮玉米（80kcal）","無糖烏龍茶（0kcal）"],total:"約 330kcal｜蛋白質 25g",tip:"去皮吃脂肪砍半，高效划算！"},
+                {store:"麥當勞",color:"#FFC72C",icon:"🍔",title:"增肌基礎點法",items:["麥辣雞腿堡（440kcal / 蛋白質 29g）","玉米杯（90kcal）","黑咖啡（5kcal）"],total:"約 535kcal｜蛋白質 31g",tip:"薯條換玉米，省下 300kcal 無效熱量！"},
+              ].map(c=>(
+                <div key={c.title} style={{marginBottom:18}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"#0d0d0d",borderRadius:12,marginBottom:8,border:`1px solid ${c.color}28`}}>
+                    <span style={{fontSize:18}}>{c.icon}</span>
+                    <span style={{fontSize:15,fontWeight:900,color:c.color}}>{c.store}</span>
+                    <span style={{marginLeft:"auto",fontSize:10,background:"#ccff0018",color:"#CCFF00",padding:"3px 8px",borderRadius:20,fontWeight:700}}>FREE</span>
+                  </div>
+                  <div style={{background:"#0a0a0a",borderRadius:12,padding:14,border:"1px solid #181818"}}>
+                    <div style={{fontSize:14,fontWeight:800,color:"#eee",marginBottom:10}}>{c.title}</div>
+                    {c.items.map(it=>(
+                      <div key={it} style={{fontSize:12,color:"#666",padding:"5px 0",borderBottom:"1px solid #111",display:"flex",gap:8}}>
+                        <span style={{color:"#CCFF00",flexShrink:0}}>▸</span>{it}
+                      </div>
+                    ))}
+                    <div style={{marginTop:10,fontSize:13,fontWeight:800,color:"#CCFF00"}}>{c.total}</div>
+                    <div style={{marginTop:8,fontSize:11,color:"#555",background:"#111",borderRadius:8,padding:"8px 10px",borderLeft:"2px solid #CCFF00"}}>💡 {c.tip}</div>
+                  </div>
+                </div>
+              ))}
+
+              {/* locked section */}
+              <div style={{position:"relative",borderRadius:14,overflow:"hidden",marginBottom:16}}>
+                <div className="blur-lock" style={{padding:16,background:"#0a0a0a",borderRadius:14,border:"1px solid #2a2a2a"}}>
+                  {[{s:"7-ELEVEN",i:"🏪",c:["訓練後黃金 30 分鐘補充組","深夜不囤脂宵夜組","7-11 全品項蛋白質排行榜"]},{s:"全家",i:"🏬",c:["週一至週五完整備餐計畫","增重期 3000kcal 達標方案"]},{s:"萊爾富/OK",i:"🏪",c:["隱藏版高蛋白商品清單","夜班族最強補充方案"]}].map(s=>(
+                    <div key={s.s} style={{marginBottom:14}}>
+                      <div style={{fontSize:14,fontWeight:900,color:"#555",marginBottom:6}}>{s.i} {s.s}</div>
+                      {s.c.map(c=><div key={c} style={{fontSize:12,color:"#333",padding:"4px 0",borderBottom:"1px solid #0f0f0f",display:"flex",gap:8}}><span>▸</span>{c}</div>)}
+                    </div>
+                  ))}
+                  <div style={{height:50}}/>
+                </div>
+                <div className="lock-overlay">
+                  <div style={{fontSize:32}}>🔒</div>
+                  <div style={{textAlign:"center"}}>
+                    <div style={{fontSize:17,fontWeight:900,color:"#fff",marginBottom:6}}>還有 47 組私藏配餐</div>
+                    <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#FF4444",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:800,color:"#fff",marginBottom:10}}>⚡ 限時特價 NT$199</div>
+                    <div style={{fontSize:13,color:"#888",lineHeight:1.9}}>想知道大衛教練這 47 組<br/>私藏超商增肌菜單嗎？<br/><span style={{color:"#CCFF00",fontWeight:700}}>讓我帶你走捷徑。</span></div>
+                  </div>
+                  <button onClick={()=>setPremium("50+ 超商增肌私藏配餐清單")} className="glow-green ripple-host" style={{padding:"15px 28px",background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:900,color:"#000",textAlign:"center",lineHeight:1.65,...C.tap}}>
+                    🔓 解鎖完整版 NT$199<br/><span style={{fontSize:12,fontWeight:700}}>50+ 超商增肌私藏配餐清單</span>
+                  </button>
+                  <div style={{fontSize:11,color:"#444"}}>一次購買 · 終身更新 · 大衛教練保證</div>
+                </div>
+              </div>
+
+              {/* golden rules */}
+              <div style={{background:"#0d0d0d",borderRadius:14,padding:16,border:"1.5px solid #ccff0028"}}>
+                <div style={{fontSize:14,fontWeight:900,color:"#CCFF00",marginBottom:14}}>⚡ 黃金法則（免費放送）</div>
+                {["每餐蛋白質：體重 × 0.4g，缺口靠蛋和豆漿補","碳水控制：一個拳頭大小 = 一份，不過量","進食順序：蛋白質 → 蔬菜 → 碳水","訓練日多吃 200–300kcal 碳水促進合成","睡前補充 20–30g 酪蛋白，夜間增肌不停歇"].map((r,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"10px 0",borderBottom:i<4?"1px solid #111":"none"}}>
+                    <div style={{width:24,height:24,background:"#CCFF00",borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"#000",flexShrink:0,marginTop:1}}>{i+1}</div>
+                    <div style={{fontSize:13,color:"#bbb",lineHeight:1.7}}>{r}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {/* floating CTA */}
+      <button className="float-btn glow-green" onClick={()=>window.open(LINKTREE_URL,"_blank")}>
+        <span style={{fontSize:20}}>📅</span>
+        <div style={{textAlign:"left"}}>
+          <div style={{fontSize:13,fontWeight:900,letterSpacing:.3}}>一對一諮詢</div>
+          <div style={{fontSize:10,fontWeight:600,opacity:.65}}>預約大衛教練</div>
+        </div>
+      </button>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
