@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>大衛教練｜增肌逆襲系統 v3.5</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:#000;color:#fff;font-family:'Segoe UI','Noto Sans TC','PingFang TC',sans-serif;min-height:100vh;overflow-x:hidden}
+input:focus,select:focus,button:focus{outline:none}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:#CCFF00;border-radius:2px}
+select option{background:#1a1a1a;color:#fff}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .45s cubic-bezier(.16,1,.3,1) both}
+
+@keyframes breatheGreen{
+  0%,100%{box-shadow:0 0 10px #ccff0055,0 0 20px #ccff0020}
+  50%{box-shadow:0 0 28px #ccff00cc,0 0 55px #ccff0060,0 0 90px #ccff0020}
+}
+.glow-green{animation:breatheGreen 2.5s ease-in-out infinite}
+
+@keyframes flameGold{
+  0%,100%{box-shadow:0 0 12px #ffaa0077,0 0 25px #ff880044}
+  50%{box-shadow:0 0 30px #ffdd00cc,0 0 60px #ffaa0088,0 0 100px #ff660033}
+}
+.glow-flame{animation:flameGold 1.8s ease-in-out infinite}
+
+@keyframes breatheRed{
+  0%,100%{box-shadow:0 0 8px #ff444455,0 0 16px #ff222230}
+  50%{box-shadow:0 0 22px #ff4444cc,0 0 44px #ff222266}
+}
+.glow-red{animation:breatheRed 2s ease-in-out infinite}
+
+@keyframes scanDrift{
+  0%{transform:translateY(-100%);opacity:0}
+  5%{opacity:1}95%{opacity:.6}
+  100%{transform:translateY(105vh);opacity:0}
+}
+.scan::before{
+  content:'';position:fixed;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(180deg,transparent,rgba(204,255,0,.07),transparent);
+  animation:scanDrift 8s linear infinite;pointer-events:none;z-index:998
+}
+
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px) scale(.95)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}to{opacity:0;transform:translateX(-50%) translateY(16px) scale(.95)}}
+.toast-in{animation:toastIn .35s cubic-bezier(.16,1,.3,1) both}
+.toast-out{animation:toastOut .3s ease-in both}
+
+@keyframes badgePop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+.badge-pop{animation:badgePop .5s cubic-bezier(.34,1.56,.64,1) both}
+
+@keyframes progressFill{from{width:0}to{width:var(--w)}}
+.progress-fill{animation:progressFill 1s cubic-bezier(.16,1,.3,1) both}
+
+@keyframes cardReveal{0%{opacity:0;transform:scale(.96) translateY(12px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.card-reveal{animation:cardReveal .5s cubic-bezier(.16,1,.3,1) both}
+
+@keyframes ripple{0%{transform:scale(0);opacity:.6}100%{transform:scale(4);opacity:0}}
+.ripple-container{position:relative;overflow:hidden}
+.ripple-effect{position:absolute;border-radius:50%;background:rgba(0,0,0,.3);animation:ripple .5s linear;pointer-events:none}
+
+@keyframes quoteFade{0%,100%{opacity:.65}50%{opacity:1}}
+.quote-pulse{animation:quoteFade 3.5s ease-in-out infinite}
+
+/* ── BLUR LOCK ── */
+.blur-lock{filter:blur(5px);user-select:none;pointer-events:none}
+.lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(180deg,#00000000 0%,#000000bb 30%,#000 100%);z-index:10;border-radius:14px;padding:24px 20px}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-wrap table{min-width:480px;width:100%;border-collapse:collapse}
+.tbl-wrap th{font-size:10px;letter-spacing:1.5px;font-weight:700;color:#555;padding:8px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid #1a1a1a}
+.tbl-wrap td{font-size:12px;padding:8px 12px;white-space:nowrap;border-bottom:1px solid #141414}
+
+/* ── SHARE CARD ── */
+.share-card{
+  background:linear-gradient(135deg,#0a0a0a 0%,#111 50%,#0a0a0a 100%);
+  border:1.5px solid #CCFF00;
+  border-radius:20px;padding:24px;
+  box-shadow:0 0 40px #ccff0030,0 0 80px #ccff0010;
+  position:relative;overflow:hidden
+}
+.share-card::before{
+  content:'';position:absolute;top:-40%;right:-20%;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,#ccff0012 0%,transparent 70%);
+  pointer-events:none
+}
+
+/* ── FLOAT BTN ── */
+.float-btn{
+  position:fixed;bottom:24px;right:16px;z-index:990;
+  background:linear-gradient(135deg,#CCFF00,#aaee00);
+  color:#000;border:none;border-radius:50px;
+  padding:14px 20px;font-size:14px;font-weight:900;
+  cursor:pointer;letter-spacing:.5px;
+  box-shadow:0 4px 20px #ccff0070,0 0 40px #ccff0030;
+  display:flex;align-items:center;gap:8px
+}
+.float-btn:active{transform:scale(.96)}
+
+/* ── WATERMARK ── */
+.watermark{
+  position:fixed;bottom:12px;left:50%;transform:translateX(-50%);
+  font-size:9px;letter-spacing:2px;color:#ccff0015;
+  font-weight:700;pointer-events:none;z-index:0;text-transform:uppercase;white-space:nowrap
+}
+</style>
+</head>
+
+<body class="scan">
+<div id="root"></div>
+<div class="watermark">COACH DAVID · MUSCLE SYSTEM v3.5 · ALL RIGHTS RESERVED</div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ══════════════════════════════════
+   CONSTANTS
+══════════════════════════════════ */
+const LS_KEY    = "coach_david_v35";
+const MAX_DAYS  = 30;
+const LINKTREE  = "https://linktr.ee/your_linktree"; // ← 替換成你的連結
+
+const QUOTES = [
+  "「自律，是你送給未來自己最好的禮物。」",
+  "「每一口蛋白質，都是跟懦弱說再見的宣言。」",
+  "「進度不明顯？那是因為你還不夠久。堅持才是最猛的天賦。」",
+  "「健身不是懲罰身體，而是在雕刻你的下一個版本。」",
+  "「不是沒時間，是你還沒把自己排進優先順序。」",
+];
+
+const ACTIVITIES = [
+  {v:1.2,   s:"🪑", l:"久坐不動"},
+  {v:1.375, s:"🚶", l:"輕度活動（週 1–3）"},
+  {v:1.55,  s:"🏋️", l:"中度活動（週 3–5）"},
+  {v:1.725, s:"⚡", l:"高度活動（週 6–7）"},
+  {v:1.9,   s:"🔥", l:"極高強度（每天訓練）"},
+];
+
+/* Coach comments */
+const COMMENTS = {
+  male:{
+    low:   "兄弟，代謝偏低代表肌肉量不足。每公斤補 1.6g 蛋白質，搭配重訓，三個月後你會認不出自己。",
+    medium:"基礎到位！每天 300kcal 盈餘，漸進超負荷訓練，你的逆襲才剛啟動。",
+    high:  "強者！代謝旺盛是天賦。每公斤 2g 蛋白質，週 4 練，六個月後你就是健身房裡的傳說。",
+  },
+  female:{
+    low:   "姐妹，別怕吃！代謝低代表需要喚醒肌肉。從優質蛋白質開始，大衛教練陪你練出線條。",
+    medium:"很棒的基礎！女生增肌節奏慢但持久。每天多 250kcal，堅持 90 天，體態會讓人驚訝。",
+    high:  "運動員代謝！別讓熱量不足阻礙你。達到增肌目標，你將擁有讓人羨慕的運動員體態。",
+  },
+};
+
+/* Today's order templates */
+const buildOrder = (tdee, goal, prot, gender) => ({
+  calories: [
+    `目標攝取 ${goal} kcal（TDEE ${tdee} + 300 增肌盈餘）`,
+    `分 4–5 餐進食，每餐間隔不超過 4 小時`,
+    `訓練後 30 分鐘內補充碳水 + 蛋白質`,
+  ],
+  protein: [
+    `全天蛋白質目標：${prot}g`,
+    `每餐至少 ${Math.round(prot/5)}–${Math.round(prot/4)}g 蛋白質`,
+    gender==="male" ? "優先選擇：雞胸、鮪魚、雞蛋、豆漿" : "優先選擇：雞胸、水煮蛋、希臘優格、豆腐",
+  ],
+  lifestyle: [
+    "今日喝水目標：體重 × 35ml",
+    "睡眠 7–8 小時，生長激素主要在深睡期分泌",
+    "訓練後冰敷或拉伸 10 分鐘，加速恢復",
+  ],
+});
+
+/* Convenience store quick picks by gap */
+const getQuickPicks = (gap) => {
+  if (gap <= 0) return {
+    label:"蛋白質已達標 🎉",
+    items:["恭喜！今日蛋白質目標已完成","可補充碳水：地瓜、飯糰維持熱量","睡前可喝一杯希臘優格鞏固成果"],
+    total:"繼續保持明天的節奏！"
+  };
+  if (gap <= 20) return {
+    label:`還差 ${gap}g 蛋白質 — 小補一下`,
+    items:["茶葉蛋 x2（蛋白質 13g）","無糖豆漿 250ml（蛋白質 8g）","水煮毛豆 1 包（蛋白質 7g）"],
+    total:`共補充約 ${Math.min(gap+5,30)}g 蛋白質`
+  };
+  if (gap <= 50) return {
+    label:`還差 ${gap}g 蛋白質 — 認真補`,
+    items:["義式雞胸肉 1 包（蛋白質 22g）","無糖豆漿 500ml（蛋白質 15g）","茶葉蛋 x2（蛋白質 13g）"],
+    total:`共補充約 50g 蛋白質`
+  };
+  return {
+    label:`還差 ${gap}g 蛋白質 — 緊急補救`,
+    items:["義式雞胸肉 x2（蛋白質 44g）","希臘優格 1 杯（蛋白質 14g）","水煮蛋 x3（蛋白質 18g）","無糖豆漿 500ml（蛋白質 15g）"],
+    total:`共補充約 91g 蛋白質，明天記得分散補充`
+  };
+};
+
+/* ── localStorage helpers ── */
+const loadData = () => {
+  try {
+    const r = localStorage.getItem(LS_KEY);
+    if (!r) return { logs:[], streak:0, lastDate:"" };
+    const d = JSON.parse(r);
+    return {
+      logs:    Array.isArray(d.logs) ? d.logs : [],
+      streak:  typeof d.streak === "number" ? d.streak : 0,
+      lastDate:typeof d.lastDate === "string" ? d.lastDate : "",
+    };
+  } catch { return { logs:[], streak:0, lastDate:"" }; }
+};
+const saveData = (data) => {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
+};
+const isoToday = () => new Date().toISOString().slice(0,10);
+const isoLabel = iso => { const [,m,d]=iso.split("-"); return `${m}/${d}`; };
+
+/* ══════════════════════════════════
+   RIPPLE HOOK
+══════════════════════════════════ */
+function useRipple() {
+  const ref = useRef(null);
+  const trigger = useCallback((e) => {
+    const el = ref.current; if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const r = document.createElement("span");
+    const size = Math.max(rect.width, rect.height);
+    r.className = "ripple-effect";
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    el.appendChild(r);
+    setTimeout(()=>r.remove(), 600);
+  }, []);
+  return [ref, trigger];
+}
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+function Toast({ msg, onDone }) {
+  const [out, setOut] = useState(false);
+  useEffect(()=>{
+    const t1=setTimeout(()=>setOut(true),2800);
+    const t2=setTimeout(()=>onDone(),3200);
+    return()=>{clearTimeout(t1);clearTimeout(t2)};
+  },[]);
+  return (
+    <div className={out?"toast-out":"toast-in"} style={{
+      position:"fixed",bottom:90,left:"50%",
+      background:"#0f0f0f",border:"1.5px solid #CCFF00",
+      borderRadius:14,padding:"14px 18px",maxWidth:330,width:"88%",
+      fontSize:13,color:"#eee",lineHeight:1.75,zIndex:9999,
+      boxShadow:"0 0 30px #ccff0040"
+    }}>
+      <span style={{color:"#CCFF00",
