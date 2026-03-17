@@ -4,510 +4,445 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <meta name="theme-color" content="#080808"/>
-<meta name="description" content="大衛教練 AI 智能增肌決策系統 v6.1 — TDEE・飲食辨識・真人審核・30天逆襲"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="大衛教練"/>
 <link rel="manifest" id="pwa-manifest"/>
-<title>大衛教練｜AI 增肌決策系統 v6.1</title>
-
+<title>大衛教練｜AI 增肌決策系統 v6.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-
 <script>
-const _m={
-  name:"大衛教練 AI 增肌決策系統",short_name:"大衛教練",
-  start_url:"/",display:"standalone",background_color:"#080808",theme_color:"#CCFF00",
-  orientation:"portrait",
-  icons:[
-    {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%23080808'/><text y='138' x='16' font-size='148'>💪</text></svg>",sizes:"192x192",type:"image/svg+xml"},
-    {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23080808'/><text y='380' x='36' font-size='420'>💪</text></svg>",sizes:"512x512",type:"image/svg+xml"}
-  ]
-};
-document.getElementById("pwa-manifest").href=URL.createObjectURL(new Blob([JSON.stringify(_m)],{type:"application/json"}));
-if("serviceWorker"in navigator){
-  navigator.serviceWorker.register("data:application/javascript,"+encodeURIComponent(
-    "self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>new Response(''))));"
-  )).catch(()=>{});
-}
+(function(){
+  var m={name:"大衛教練 AI 增肌決策系統",short_name:"大衛教練",start_url:"/",display:"standalone",background_color:"#080808",theme_color:"#CCFF00",orientation:"portrait",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%23080808'/><text y='138' x='16' font-size='148'>💪</text></svg>",sizes:"192x192",type:"image/svg+xml"}]};
+  var el=document.getElementById("pwa-manifest");
+  if(el)el.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/json"}));
+  if("serviceWorker"in navigator){navigator.serviceWorker.register("data:application/javascript,"+encodeURIComponent("self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>new Response(''))));")).catch(function(){});}
+})();
 </script>
-
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{
-  background:#080808;color:#D1D5DB;
-  font-family:'Noto Sans TC','Segoe UI',sans-serif;
-  min-height:100vh;overflow-x:hidden;overscroll-behavior:none;
-}
+html{-webkit-text-size-adjust:100%}
+body{background:#080808;color:#D1D5DB;font-family:'Noto Sans TC','Segoe UI',sans-serif;min-height:100dvh;overflow-x:hidden;overscroll-behavior:none}
 input,textarea,select,button{font-family:inherit}
 input:focus,textarea:focus,button:focus{outline:none}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+textarea{resize:none}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:#CCFF00;border-radius:2px}
-textarea{resize:none}
 
-:root{
-  --g:#CCFF00;--gd:#aaee00;
-  --gold:#FFD700;--or:#FF9500;--re:#FF4444;--bl:#38BDF8;--pk:#FF4488;
-  --hi:#F9FAFB;--md:#D1D5DB;--lo:#9CA3AF;--dm:#6B7280;
-  --s1:#111111;--s2:#0d0d0d;--s3:#0a0a0a;
-  --br:rgba(204,255,0,.10);--br2:rgba(204,255,0,.20);
-}
-
-/* grain */
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");}
-
-/* ── Animations ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.au{animation:fadeUp .42s cubic-bezier(.16,1,.3,1) both}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.ai{animation:fadeIn .28s ease both}
-
-@keyframes glowG{
-  0%,100%{box-shadow:0 0 14px rgba(204,255,0,.4),0 0 32px rgba(204,255,0,.14)}
-  50%{box-shadow:0 0 38px rgba(204,255,0,.85),0 0 75px rgba(204,255,0,.42),0 0 115px rgba(204,255,0,.12)}}
-.gg{animation:glowG 2.8s ease-in-out infinite}
-
-@keyframes glowF{
-  0%,100%{box-shadow:0 0 14px rgba(255,170,0,.48),0 0 28px rgba(255,136,0,.22)}
-  50%{box-shadow:0 0 40px rgba(255,221,0,.9),0 0 80px rgba(255,170,0,.65),0 0 120px rgba(255,102,0,.18)}}
-.gf{animation:glowF 1.9s ease-in-out infinite}
-
-@keyframes glowB{
-  0%,100%{box-shadow:0 0 12px rgba(56,189,248,.4),0 0 28px rgba(56,189,248,.14)}
-  50%{box-shadow:0 0 32px rgba(56,189,248,.85),0 0 65px rgba(56,189,248,.42)}}
-.gb{animation:glowB 2.4s ease-in-out infinite}
-
-@keyframes glowR{0%,100%{box-shadow:0 0 8px rgba(255,68,68,.35)}50%{box-shadow:0 0 24px rgba(255,68,68,.9),0 0 48px rgba(255,34,34,.5)}}
-.gr{animation:glowR 2s ease-in-out infinite}
-
-@keyframes goalP{
-  0%,100%{box-shadow:0 0 0 2px rgba(204,255,0,.48),0 0 22px rgba(204,255,0,.22)}
-  50%{box-shadow:0 0 0 3px rgba(204,255,0,.9),0 0 46px rgba(204,255,0,.55),0 0 80px rgba(204,255,0,.12)}}
-.gp{animation:goalP 2.4s ease-in-out infinite}
-
-/* Ticker */
+@keyframes glowG{0%,100%{box-shadow:0 0 14px rgba(204,255,0,.4),0 0 32px rgba(204,255,0,.14)}50%{box-shadow:0 0 40px rgba(204,255,0,.85),0 0 75px rgba(204,255,0,.42)}}
+@keyframes glowF{0%,100%{box-shadow:0 0 14px rgba(255,170,0,.48)}50%{box-shadow:0 0 40px rgba(255,221,0,.9),0 0 80px rgba(255,170,0,.65)}}
+@keyframes glowB{0%,100%{box-shadow:0 0 12px rgba(56,189,248,.4)}50%{box-shadow:0 0 32px rgba(56,189,248,.85),0 0 65px rgba(56,189,248,.42)}}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.tick{display:flex;animation:ticker 30s linear infinite;will-change:transform}
-.tick:hover{animation-play-state:paused}
-
-/* Scan */
-@keyframes scanL{0%{top:0;opacity:0}5%{opacity:1}95%{opacity:.5}100%{top:100%;opacity:0}}
-.sw{position:relative;overflow:hidden}
-.sw::before{content:'';position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#CCFF00 30%,#CCFF00 70%,transparent);animation:scanL 1.6s linear infinite;z-index:5;pointer-events:none}
-@keyframes radarP{0%{transform:scale(1);opacity:.85}100%{transform:scale(3.2);opacity:0}}
-.rr{animation:radarP 1.4s ease-out infinite}
-
-/* Ripple */
-@keyframes ripA{0%{transform:scale(0);opacity:.35}100%{transform:scale(4);opacity:0}}
-.rh{position:relative;overflow:hidden}
-.rd{position:absolute;border-radius:50%;background:rgba(0,0,0,.2);animation:ripA .52s linear;pointer-events:none}
-
-/* Toast */
-@keyframes tIn{from{opacity:0;transform:translateX(-50%) translateY(16px) scale(.95)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
-@keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(12px) scale(.95)}}
-.tin{animation:tIn .32s cubic-bezier(.16,1,.3,1) both}
-.tout{animation:tOut .25s ease-in both}
-
-@keyframes bPop{0%{transform:scale(.48);opacity:0}72%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
-.bp{animation:bPop .52s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes cr{0%{opacity:0;transform:scale(.96) translateY(10px)}100%{opacity:1;transform:none}}
-.cr{animation:cr .44s cubic-bezier(.16,1,.3,1) both}
-@keyframes barF{from{width:0}to{width:var(--w)}}
-.bf{animation:barF .92s cubic-bezier(.16,1,.3,1) .22s both}
-@keyframes chatB{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
-.cb{animation:chatB .36s cubic-bezier(.16,1,.3,1) both}
-@keyframes dotP{0%,100%{opacity:.28;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
-@keyframes hb{0%,100%{transform:scale(1)}14%{transform:scale(1.28)}28%{transform:scale(1)}42%{transform:scale(1.18)}70%{transform:scale(1)}}
-.hb{animation:hb 1.6s ease-in-out infinite}
-
-/* David Persona bubble */
-@keyframes personaBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.persona-bob{animation:personaBob 3.2s ease-in-out infinite}
-
-/* VIP shine */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ripple{0%{transform:scale(0);opacity:.3}100%{transform:scale(4);opacity:0}}
+@keyframes bPop{0%{transform:scale(.5);opacity:0}72%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes crIn{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes barFill{from{width:0}to{width:var(--w)}}
+@keyframes chatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes dotPulse{0%,100%{opacity:.25;transform:scale(.78)}50%{opacity:1;transform:scale(1)}}
 @keyframes vipShine{0%{background-position:-200% center}100%{background-position:200% center}}
-.vs{background:linear-gradient(90deg,#FFD700 0%,#FFF8DC 45%,#FFD700 55%,#FF8800 100%);background-size:200% auto;animation:vipShine 2.5s linear infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes personaBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes hb{0%,100%{transform:scale(1)}14%{transform:scale(1.26)}28%{transform:scale(1)}42%{transform:scale(1.16)}70%{transform:scale(1)}}
+@keyframes tIn{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(12px)}}
 
-/* Lock overlay */
-.blk{filter:blur(5px);user-select:none;pointer-events:none}
-.lov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.9) 24%,#010101 100%);z-index:10;border-radius:16px;padding:26px 20px}
-
-/* Table */
-.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tsc table{min-width:430px;width:100%;border-collapse:collapse}
-.tsc th{font-size:10px;letter-spacing:1.6px;font-weight:700;color:#4B5563;padding:9px 11px;text-align:left;white-space:nowrap;border-bottom:1px solid #1f1f1f}
-.tsc td{font-size:12px;padding:9px 11px;white-space:nowrap;border-bottom:1px solid #161616;color:var(--md)}
-
-/* Modal */
-.mb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}
-.mx{background:linear-gradient(145deg,#0d0d0d,#111208,#0d0d0d);border-radius:22px;padding:28px 22px;width:100%;max-width:420px;position:relative;overflow:hidden;max-height:90vh;overflow-y:auto}
-.mx::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(204,255,0,.5),transparent)}
-
-/* Card */
-.card{background:var(--s1);border-radius:16px;padding:18px;margin-bottom:14px;border:1px solid var(--br);position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(204,255,0,.1),transparent)}
-
+.gg{animation:glowG 2.8s ease-in-out infinite}
+.gf{animation:glowF 1.9s ease-in-out infinite}
+.gb{animation:glowB 2.4s ease-in-out infinite}
+.au{animation:fadeUp .4s cubic-bezier(.16,1,.3,1) both}
+.ai{animation:fadeIn .25s ease both}
+.bp{animation:bPop .5s cubic-bezier(.34,1.56,.64,1) both}
+.cr{animation:crIn .42s cubic-bezier(.16,1,.3,1) both}
+.cb{animation:chatIn .34s cubic-bezier(.16,1,.3,1) both}
+.hb{animation:hb 1.6s ease-in-out infinite}
+.pbob{animation:personaBob 3.2s ease-in-out infinite}
+.vs{background:linear-gradient(90deg,#FFD700 0%,#FFF5CC 45%,#FFD700 55%,#FF8800 100%);background-size:200% auto;animation:vipShine 2.5s linear infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tick{display:flex;animation:ticker 32s linear infinite;will-change:transform}
+.tick:hover{animation-play-state:paused}
+.rh{position:relative;overflow:hidden}
+.rd{position:absolute;border-radius:50%;background:rgba(0,0,0,.2);animation:ripple .5s linear;pointer-events:none}
 .tap{-webkit-tap-highlight-color:transparent}
-.wm{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:2.5px;color:rgba(204,255,0,.04);font-weight:700;pointer-events:none;z-index:0;white-space:nowrap;font-family:'JetBrains Mono',monospace}
+.tin{animation:tIn .3s cubic-bezier(.16,1,.3,1) both}
+.tout{animation:tOut .24s ease-in both}
+.bf{animation:barFill .9s cubic-bezier(.16,1,.3,1) .1s both}
+.blk{filter:blur(5px);user-select:none;pointer-events:none}
 
-/* Photo preview */
-.photo-frame{width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#0a0a0a;border:2px solid #ccff0030;display:flex;align-items:center;justify-content:center;position:relative}
+.card{background:#111;border-radius:16px;padding:18px;margin-bottom:14px;border:1px solid rgba(204,255,0,.10);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(204,255,0,.1),transparent)}
+.lov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.92) 20%,#010101 100%);z-index:10;border-radius:16px;padding:26px 20px}
+.mb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}
+.mx{background:linear-gradient(145deg,#0d0d0d,#111208,#0d0d0d);border-radius:22px;padding:28px 22px;width:100%;max-width:420px;position:relative;overflow:hidden;max-height:88dvh;overflow-y:auto}
+.mx::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(204,255,0,.48),transparent)}
+.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tsc table{min-width:380px;width:100%;border-collapse:collapse}
+.tsc th{font-size:10px;letter-spacing:1.5px;font-weight:700;color:#4B5563;padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid #1f1f1f}
+.tsc td{font-size:12px;padding:8px 10px;white-space:nowrap;border-bottom:1px solid #161616;color:#D1D5DB}
 </style>
 </head>
-<body>
-<div id="root" style="position:relative;z-index:1"></div>
-<div class="wm">COACH DAVID · AI MUSCLE SYSTEM v6.1 · ALL RIGHTS RESERVED</div>
+<body style="background:linear-gradient(160deg,#0e0e0a 0%,#080808 42%,#0c0c08 72%,#080808 100%)">
+<div id="root"></div>
 
 <script type="text/babel">
-const {useState,useEffect,useRef,useCallback,useMemo,memo}=React;
+const {useState,useEffect,useRef,useCallback,memo}=React;
 
-/* ═══════════════════════════════════
-   CONSTANTS
-═══════════════════════════════════ */
+/* ════════════════════════════════════
+   CONFIG
+════════════════════════════════════ */
 const LINE_URL  = "https://lin.ee/XV4Jw1m";
 const LINKTREE  = "https://linktr.ee/daweishen";
 const VIP_CODE  = "DAVID888";
-const LS_KEY    = "cdv61";
-const MAX_DAYS  = 30;
+const LS_KEY    = "cdv63";
 
-const lineMsg = (msg) => {
-  window.open(`${LINE_URL}?text=${encodeURIComponent(msg)}`, "_blank");
-};
-const lineConsult = () => lineMsg("教練，我已準備好支付 199 元領取解鎖碼，並想諮詢一對一教學。");
-const linePhotoAudit = (tdee, goal, prot) => lineMsg(
-  `教練，這是我這餐的照片，請幫我看看營養比例！\n\n我的數據：TDEE ${tdee||"未計算"} kcal，目標：${goal||"增肌"}，蛋白質目標 ${prot||"—"}g/日`
-);
+/* ════════════════════════════════════
+   LINE HELPERS — all real, all open LINE
+════════════════════════════════════ */
+const openLine = (msg) =>
+  window.open(msg ? `${LINE_URL}?text=${encodeURIComponent(msg)}` : LINE_URL, "_blank");
 
-/* ═══════════════════════════════════
+const lineConsult   = () => openLine("教練，我已準備好支付 199 元領取解鎖碼，並想諮詢一對一教學。");
+const lineVipUnlock = () => openLine("教練，我已付費，請給我本月解鎖碼，並啟動一對一諮詢。");
+const lineReport    = (txt) => openLine(`教練，以下是我今日的飲食追蹤報表，請幫我確認：\n\n${txt}`);
+const linePhotoAudit= (tdee, goalLabel, prot) =>
+  openLine(`教練，這是我這餐的照片，請幫我看看營養比例！\n\nTDEE：${tdee||"未計算"} kcal\n目標：${goalLabel||"增肌"}\n蛋白質目標：${prot||"—"} g/日`);
+
+/* ════════════════════════════════════
    STATIC DATA
-═══════════════════════════════════ */
+════════════════════════════════════ */
 const GOALS = [
-  {id:"muscle",icon:"💪",label:"增肌",sub:"盈餘+300 · 蛋白優先",color:"#CCFF00"},
-  {id:"cut",   icon:"🔥",label:"減脂",sub:"缺口-400 · 飽足優先",color:"#FF9500"},
-  {id:"keep",  icon:"⚖️",label:"維持",sub:"TDEE平衡 · 體態雕塑",color:"#38BDF8"},
+  {id:"muscle", icon:"💪", label:"增肌", sub:"盈餘+300 · 蛋白優先",   color:"#CCFF00"},
+  {id:"cut",    icon:"🔥", label:"減脂", sub:"缺口-400 · 飽足優先",   color:"#FF9500"},
+  {id:"keep",   icon:"⚖️", label:"維持", sub:"TDEE平衡 · 體態雕塑",   color:"#38BDF8"},
 ];
 
-const ACTS=[
-  {v:1.2,  s:"🪑",l:"久坐不動（辦公室族）"},
-  {v:1.375,s:"🚶",l:"輕度活動（週 1–3 天）"},
-  {v:1.55, s:"🏋️",l:"中度活動（週 3–5 天）"},
-  {v:1.725,s:"⚡",l:"高度活動（週 6–7 天）"},
-  {v:1.9,  s:"🔥",l:"極高強度（每天訓練）"},
+const ACTS = [
+  {v:1.2,   s:"🪑", l:"久坐不動（辦公室族）",   d:"坐辦公室超過 8 小時，幾乎不額外運動"},
+  {v:1.375, s:"🚶", l:"輕度活動（週 1–3 天）",  d:"每週有氧或輕重訓 1–3 次"},
+  {v:1.55,  s:"🏋️", l:"中度活動（週 3–5 天）",  d:"規律重訓或有氧，每週 3–5 次"},
+  {v:1.725, s:"⚡", l:"高度活動（週 6–7 天）",  d:"幾乎每天訓練或勞力密集工作"},
+  {v:1.9,   s:"🔥", l:"極高強度（每日訓練）",    d:"每天訓練 + 勞力工作，運動員等級"},
 ];
 
-/* David persona: 碎碎念 */
+const NEA_OPTIONS = [
+  {id:"commute", label:"今日有通勤步行 / 騎車",      kcal:80},
+  {id:"stand",   label:"今日工作需大量站立或走動",    kcal:80},
+  {id:"chores",  label:"今日有做家事 / 購物 / 遛狗", kcal:80},
+  {id:"stairs",  label:"今日有爬樓梯超過 10 層",      kcal:80},
+];
+
 const DAVID_RANTS = [
-  {mood:"🔥",text:"今天下雨？這正是拉開你跟對手距離的時候。他們在家躺平，你在這裡訓練。",sub:"差距，就是這樣拉開的。"},
-  {mood:"💪",text:"如果累了，就選 60 分的堅持，也勝過 0 分的放棄。沒有人要求你每天都完美。",sub:"完成比完美更重要。"},
-  {mood:"🎯",text:"你以為你在練身體，其實你在練意志。肌肉是結果，紀律才是真正的目標。",sub:"讓自律成為你最強的武器。"},
-  {mood:"⚡",text:"蛋白質吃夠了嗎？別騙自己，差 20g 就是差 20g，補起來就對了。",sub:"細節決定結果。"},
-  {mood:"🌙",text:"今晚睡好，生長激素在深睡期爆發。睡眠是免費的合法增肌藥，別浪費。",sub:"恢復也是訓練的一部分。"},
-  {mood:"🏆",text:"三個月後，你會感謝今天沒有放棄的自己。未來的你，正在等現在的決定。",sub:"今天的選擇，塑造明天的你。"},
-  {mood:"😤",text:"別說沒時間。20 分鐘的訓練＋足夠的蛋白質，已經贏過 90% 的人了。",sub:"做就對了，廢話少說。"},
+  {mood:"🔥", text:"今天下雨？這正是拉開你跟對手距離的時候。他們在家躺平，你在這裡訓練。",  sub:"差距，就是這樣拉開的。"},
+  {mood:"💪", text:"如果累了，就選 60 分的堅持，也勝過 0 分的放棄。沒有人要求你每天都完美。", sub:"完成比完美更重要。"},
+  {mood:"🎯", text:"你以為你在練身體，其實你在練意志。肌肉是結果，紀律才是真正的目標。",  sub:"讓自律成為你最強的武器。"},
+  {mood:"⚡", text:"蛋白質吃夠了嗎？別騙自己，差 20g 就是差 20g，補起來就對了。",         sub:"細節決定結果。"},
+  {mood:"🌙", text:"今晚睡好，生長激素在深睡期爆發。睡眠是免費的合法增肌藥，別浪費。",     sub:"恢復也是訓練的一部分。"},
+  {mood:"🏆", text:"三個月後，你會感謝今天沒有放棄的自己。未來的你，正在等現在的決定。",   sub:"今天的選擇，塑造明天的你。"},
+  {mood:"😤", text:"別說沒時間。20 分鐘訓練 + 足夠蛋白質，已經贏過 90% 的人了。",         sub:"做就對了，廢話少說。"},
 ];
 
 const TIRED_MSGS = [
-  {icon:"🤗",title:"大衛教練收到了",c:"#38BDF8",msg:"今天很累沒關係，這說明你已經付出很多了。\n\n疲憊感是身體在說話：「我需要恢復。」\n\n今天的最小行動：\n▸ 喝一杯水\n▸ 吃一顆蛋\n▸ 躺下來做 3 次深呼吸\n\n就這樣。其他的，明天再說。"},
-  {icon:"💙",title:"大衛教練懂你",c:"#CCFF00",msg:"每個認真的人都有累的時候，這不代表你失敗了。\n\n你今天還是打開了這個 App——這本身就是勝利。\n\n記住：60 分的持續，遠勝 100 分的放棄。\n\n今晚好好睡，明天的你會更強。"},
-  {icon:"🌙",title:"教練說：今天准你休息",c:"#FF9500",msg:"聽好：休息不是偷懶，休息是訓練的一部分。\n\n生長激素在深睡期大量分泌，今晚睡滿 7 小時，等於免費打一針合法增肌藥。\n\n把手機放下。現在最重要的任務就是睡覺。\n\n明天見，勇士。💪"},
+  {icon:"🤗", title:"大衛教練收到了", c:"#38BDF8",
+   msg:"今天很累沒關係，這說明你已經付出很多了。\n\n疲憊感是身體在說話：「我需要恢復。」\n\n今天最小行動：\n▸ 喝一杯水\n▸ 吃一顆蛋\n▸ 躺下來做 3 次深呼吸\n\n就這樣。其他的，明天再說。"},
+  {icon:"💙", title:"大衛教練懂你",   c:"#CCFF00",
+   msg:"每個認真的人都有累的時候，這不代表你失敗了。\n\n你今天還是打開了這個 App——這本身就是勝利。\n\n記住：60 分的持續，遠勝 100 分的放棄。\n\n今晚好好睡，明天的你會更強。"},
+  {icon:"🌙", title:"教練說：今天准你休息", c:"#FF9500",
+   msg:"聽好：休息不是偷懶，休息是訓練的一部分。\n\n生長激素在深睡期大量分泌，今晚睡滿 7 小時，等於免費打一針合法增肌藥。\n\n把手機放下。現在最重要的任務就是睡覺。\n\n明天見，勇士。💪"},
 ];
 
-/* ── Day 1 (FREE preview) ── */
-const DAY1_PLAN = {
-  workout:{
-    title:"第 1 天 · 全身啟動訓練",
-    note:"初學者或回歸訓練首日，以動作品質優先，感受肌肉連結。",
-    exercises:[
-      {name:"深蹲（徒手）",sets:3,reps:"15",tip:"雙腳與肩同寬，背打直，蹲到大腿平行地面再站起。感受股四頭與臀部發力。"},
-      {name:"伏地挺身",sets:3,reps:"10–12",tip:"核心收緊成一直線，下放時胸口輕觸地面，推起時完全伸展。"},
-      {name:"啞鈴划船（單臂）",sets:3,reps:"每邊12",tip:"一手撐桌，背部打平，手肘貼近身體往後拉，頂點停 1 秒。"},
-      {name:"平板支撐",sets:3,reps:"30秒",tip:"核心全程收緊，臀部不抬高也不塌腰，正常呼吸不憋氣。"},
-    ]
-  },
-  breakfast:{
-    title:"第 1 天 · 增肌早餐方案",
-    items:[
-      {food:"水煮蛋 × 2",kcal:150,prot:12,note:"完全蛋白質，生物利用率最高"},
-      {food:"無糖黑豆漿 500ml",kcal:90,prot:15,note:"超商最被低估的增肌飲品"},
-      {food:"地瓜（中型）",kcal:130,prot:2,note:"低 GI 碳水，穩定提供能量"},
-    ],
-    total:{kcal:370,prot:29},
-    tip:"早餐蛋白質達到 25–30g 是一天達標的關鍵起點。",
-  }
-};
-
-/* ── Days 2–7 locked preview content ── */
-const DAYS_LOCKED = [
-  {day:2,workout:"上肢推力日",breakfast:"高蛋白午前補給",locked:true},
-  {day:3,workout:"下肢爆發日",breakfast:"訓練後黃金視窗餐",locked:true},
-  {day:4,workout:"上肢拉力日",breakfast:"休息日低碳補給",locked:true},
-  {day:5,workout:"核心 + 有氧日",breakfast:"週中補充策略",locked:true},
-  {day:6,workout:"全身大重量日",breakfast:"週末外食生存術",locked:true},
-  {day:7,workout:"主動恢復日",breakfast:"週末備餐計畫",locked:true},
+const QUICK_FOODS = [
+  {name:"水煮蛋",     kcal:75,  prot:6,  icon:"🥚"},
+  {name:"雞胸肉100g", kcal:165, prot:31, icon:"🍗"},
+  {name:"黑豆漿500ml",kcal:90,  prot:15, icon:"🥛"},
+  {name:"地瓜",       kcal:130, prot:2,  icon:"🍠"},
+  {name:"白飯碗",     kcal:280, prot:5,  icon:"🍚"},
+  {name:"希臘優格",   kcal:130, prot:14, icon:"🫙"},
+  {name:"鮭魚100g",   kcal:208, prot:20, icon:"🐟"},
+  {name:"毛豆100g",   kcal:100, prot:9,  icon:"🫛"},
+  {name:"茶葉蛋",     kcal:78,  prot:6,  icon:"🥚"},
+  {name:"燙青菜",     kcal:40,  prot:2,  icon:"🥦"},
 ];
 
-/* ── 7-day full plans (VIP) ── */
-const FULL_WEEK = [
-  {day:1,meals:["早：水煮蛋×2 + 無糖黑豆漿 + 地瓜","午：滷雞腿 + 燙青菜 + 半碗飯","晚：鮭魚 100g + 燕麥 + 毛豆"],prot:128,kcal:1650},
-  {day:2,meals:["早：希臘優格 + 香蕉 + 茶葉蛋×2","午：FamiChicken 去皮 + 玉米 + 豆漿","晚：雞胸肉沙拉 + 無糖豆漿"],prot:122,kcal:1580},
-  {day:3,meals:["早：義式雞胸肉 + 無糖黑豆漿","午：自助餐蒸魚 + 炒豆腐 + 飯","晚：牛肉片火鍋 150g + 凍豆腐"],prot:135,kcal:1720},
-  {day:4,meals:["早：水煮蛋×3 + 無糖豆漿 250ml","午：雞腿便當（去皮減飯）","晚：炒蛋×2 + 無糖黑豆漿"],prot:118,kcal:1600},
-  {day:5,meals:["早：燕麥 50g + 希臘優格 + 毛豆","午：麥辣雞腿堡 + 玉米杯 + 黑咖啡","晚：雞胸肉 100g + 地瓜 + 燙青菜"],prot:126,kcal:1660},
-  {day:6,meals:["早：水煮蛋×2 + 無糖黑豆漿","午：火鍋（豬肉片+豆腐+菇類大量）","晚：希臘優格 + 燕麥 + 香蕉"],prot:132,kcal:1700},
-  {day:7,meals:["早：義式雞胸肉 + 鮮奶 250ml","午：滷豬腱 + 燙青菜 + 半碗飯","晚：鮭魚 100g + 燕麥 50g"],prot:130,kcal:1680},
+const FOOD_DB = [
+  ["義式雞胸肉",120,22,2,0,"超商"],["茶葉蛋",78,6,5,1,"超商"],
+  ["無糖黑豆漿500ml",90,15,2,3,"超商"],["希臘優格",130,14,0,13,"超商"],
+  ["水煮毛豆100g",100,9,5,8,"超商"],["地瓜中型",130,2,0,30,"超商"],
+  ["白飯一碗200g",280,5,0,62,"外食"],["燙青菜",40,2,1,5,"外食"],
+  ["滷雞腿",220,25,11,3,"外食"],["炒豆腐",120,10,7,4,"外食"],
+  ["牛肉片100g",200,20,14,0,"火鍋"],["凍豆腐100g",80,8,4,2,"火鍋"],
+  ["麥辣雞腿堡",440,29,19,38,"速食"],["玉米杯",90,3,1,18,"速食"],
+  ["黑咖啡",5,0,0,1,"速食"],["水煮蛋1顆",75,6,5,0,"通用"],
+  ["雞胸肉100g",165,31,4,0,"通用"],["鮭魚100g",208,20,13,0,"通用"],
+  ["燕麥片50g",180,6,3,30,"通用"],["香蕉中型",90,1,0,23,"通用"],
 ];
 
-/* ── Workouts ── */
 const WORKOUTS = {
-  muscle:{title:"增肌日｜複合動作",exercises:[
+  muscle:{title:"今日增肌訓練",exercises:[
     {name:"槓鈴深蹲",sets:4,reps:"6–8",tip:"背打直，蹲至大腿平行，站起呼氣"},
     {name:"啞鈴臥推",sets:4,reps:"8–10",tip:"肩胛夾緊，下放感受胸肌拉伸"},
     {name:"引體向上",sets:3,reps:"力竭",tip:"頂峰收縮 1 秒，背闊肌主導"},
     {name:"坐姿肩推",sets:3,reps:"10–12",tip:"不鎖死手肘，肩胛全程穩定"},
     {name:"農夫走路",sets:3,reps:"20步",tip:"核心收緊，不聳肩"},
-  ],note:"訓練後 30 分鐘補 40g 蛋白質 + 60g 碳水！"},
-  cut:{title:"減脂日｜高效循環",exercises:[
+  ],note:"訓練後 30 分鐘補 40g 蛋白質 + 60g 碳水，黃金合成視窗！"},
+  cut:{title:"今日減脂訓練",exercises:[
     {name:"波比跳",sets:4,reps:"12",tip:"全力爆發，間歇 45 秒，心率 75%+"},
     {name:"箭步蹲",sets:3,reps:"每腿12",tip:"前膝不超腳尖，後膝輕點地"},
-    {name:"TRX 划船",sets:4,reps:"15",tip:"身體一直線，不塌腰"},
     {name:"平板支撐",sets:3,reps:"45秒",tip:"臀部不抬高，呼吸穩定"},
     {name:"跳繩",sets:4,reps:"1分鐘",tip:"前腳掌落地，手腕輕鬆"},
   ],note:"訓練前補 20g 蛋白質，保肌同時燃脂！"},
-  keep:{title:"維持日｜功能訓練",exercises:[
+  keep:{title:"今日維持訓練",exercises:[
     {name:"壺鈴搖擺",sets:4,reps:"15",tip:"臀部主導，爆發性推髖"},
     {name:"伏地挺身",sets:3,reps:"12–15",tip:"嘗試鑽石或寬距增加刺激"},
     {name:"單腿硬舉",sets:3,reps:"每腿10",tip:"支撐腿微彎，骨盆穩定"},
     {name:"側板支撐",sets:3,reps:"每側30秒",tip:"腰不下塌，斜腹收緊"},
-    {name:"彈力帶側走",sets:3,reps:"每側15步",tip:"臀中肌啟動，膝朝外"},
   ],note:"維持期著重動作品質，充血感就對了！"},
 };
 
-/* ── Food DB ── */
-const FOOD_DB=[
-  ["義式雞胸肉",120,22,2,0,"超商"],["茶葉蛋",78,6,5,1,"超商"],
-  ["溫泉蛋",70,6,5,0,"超商"],["無糖黑豆漿500ml",90,15,2,3,"超商"],
-  ["無糖豆漿250ml",45,8,1,2,"超商"],["希臘優格",130,14,0,13,"超商"],
-  ["水煮毛豆100g",100,9,5,8,"超商"],["雞胸肉沙拉",200,22,8,10,"超商"],
-  ["鮪魚飯糰",200,8,3,35,"超商"],["地瓜中型",130,2,0,30,"超商"],
-  ["FamiChicken去皮",250,22,12,8,"超商"],["白飯一碗200g",280,5,0,62,"外食"],
-  ["燙青菜",40,2,1,5,"外食"],["滷雞腿",220,25,11,3,"外食"],
-  ["炒豆腐",120,10,7,4,"外食"],["牛肉片100g",200,20,14,0,"火鍋"],
-  ["豬肉片100g",180,17,12,0,"火鍋"],["凍豆腐100g",80,8,4,2,"火鍋"],
-  ["麥辣雞腿堡",440,29,19,38,"速食"],["玉米杯",90,3,1,18,"速食"],
-  ["黑咖啡",5,0,0,1,"速食"],["排骨便當",780,28,28,95,"便當"],
-  ["雞腿便當",650,32,22,75,"便當"],["水煮蛋1顆",75,6,5,0,"通用"],
-  ["雞胸肉100g",165,31,4,0,"通用"],["鮭魚100g",208,20,13,0,"通用"],
-  ["燕麥片50g",180,6,3,30,"通用"],["香蕉中型",90,1,0,23,"通用"],
-];
-
-const parseNLP=(text)=>{
-  const t=text.toLowerCase();
-  const matched=[];let tK=0,tP=0,tF=0,tC=0;
-  for(const f of FOOD_DB){
-    const kws=f[0].toLowerCase().replace(/[（）()]/g,"").split(/[\s\/]/);
-    const main=kws[0]; if(main.length<2)continue;
-    if(!t.includes(main))continue;
-    let qty=1,scale=1;
-    const numM=t.match(/(\d+(?:\.\d+)?)\s*(?:個|顆|份|碗|杯|包|片|塊|根|條)/);
-    if(numM)qty=parseFloat(numM[1]);
-    const mlM=t.match(/(\d+)\s*(?:ml|毫升)/);
-    if(mlM&&f[0].includes("ml")){const fm=parseInt(f[0].match(/(\d+)ml/)?.[1]||"250");scale=parseInt(mlM[1])/fm;qty=1;}
-    const gM=t.match(/(\d+)\s*(?:g|公克|克)/);
-    if(gM&&f[0].includes("100g")){scale=parseInt(gM[1])/100;qty=1;}
-    const k=Math.round(f[1]*qty*scale),p=Math.round(f[2]*qty*scale),ff=Math.round(f[3]*qty*scale),c=Math.round(f[4]*qty*scale);
-    matched.push({name:f[0],qty,kcal:k,prot:p,fat:ff,carb:c});
-    tK+=k;tP+=p;tF+=ff;tC+=c;
+const DAY1 = {
+  workout:{
+    exercises:[
+      {name:"徒手深蹲",sets:3,reps:"15",tip:"雙腳與肩同寬，背打直，蹲到大腿平行地面再站起"},
+      {name:"伏地挺身",sets:3,reps:"10–12",tip:"核心收緊成一直線，下放時胸口輕觸，推起完全伸展"},
+      {name:"啞鈴划船（單臂）",sets:3,reps:"每邊12",tip:"一手撐桌，背部打平，手肘貼近身體往後拉，頂點停 1 秒"},
+      {name:"平板支撐",sets:3,reps:"30秒",tip:"核心全程收緊，臀部不抬高，正常呼吸不憋氣"},
+    ]
+  },
+  breakfast:{
+    items:[
+      {food:"水煮蛋 × 2",kcal:150,prot:12,note:"完全蛋白質，生物利用率最高"},
+      {food:"無糖黑豆漿 500ml",kcal:90,prot:15,note:"超商最被低估的增肌飲品"},
+      {food:"地瓜（中型）",kcal:130,prot:2,note:"低 GI 碳水，穩定提供能量"},
+    ],
+    total:{kcal:370,prot:29}
   }
-  return{matched,totalKcal:tK,totalProt:tP,totalFat:tF,totalCarb:tC};
 };
 
-/* Storage */
-const loadD=()=>{try{const r=localStorage.getItem(LS_KEY);const def={logs:[],streak:0,savedGoal:"muscle",savedForm:null,nlpCount:0,isVip:false};return r?{...def,...JSON.parse(r)}:def;}catch{return{logs:[],streak:0,savedGoal:"muscle",savedForm:null,nlpCount:0,isVip:false};}};
-const saveD=d=>{try{localStorage.setItem(LS_KEY,JSON.stringify(d));}catch{}};
-const isoToday=()=>new Date().toISOString().slice(0,10);
-const isoLbl=iso=>{const[,m,d]=iso.split("-");return`${m}/${d}`;};
-const calcStreak=logs=>{if(!logs.length)return 0;const s=[...logs].sort((a,b)=>b.date.localeCompare(a.date));let c=0,cur=new Date();cur.setHours(0,0,0,0);for(const l of s){const ld=new Date(l.date+"T00:00:00");if(Math.round((cur-ld)/86400000)<=1){c++;cur=ld;}else break;}return c;};
+const WEEK_PLAN = [
+  {day:1,meals:["早：水煮蛋×2 + 無糖黑豆漿 + 地瓜","午：滷雞腿 + 燙青菜 + 半碗飯","晚：鮭魚100g + 燕麥 + 毛豆"],prot:128,kcal:1650},
+  {day:2,meals:["早：希臘優格 + 香蕉 + 茶葉蛋×2","午：雞胸肉沙拉 + 無糖豆漿","晚：滷雞腿 + 燙青菜 + 半碗飯"],prot:122,kcal:1580},
+  {day:3,meals:["早：義式雞胸肉 + 無糖黑豆漿","午：自助餐蒸魚 + 炒豆腐 + 飯","晚：牛肉片火鍋150g + 凍豆腐"],prot:135,kcal:1720},
+  {day:4,meals:["早：水煮蛋×3 + 無糖豆漿250ml","午：雞腿便當（去皮減飯）","晚：炒蛋×2 + 無糖黑豆漿"],prot:118,kcal:1600},
+  {day:5,meals:["早：燕麥50g + 希臘優格 + 毛豆","午：麥辣雞腿堡 + 玉米杯 + 黑咖啡","晚：雞胸肉100g + 地瓜 + 燙青菜"],prot:126,kcal:1660},
+  {day:6,meals:["早：水煮蛋×2 + 無糖黑豆漿","午：火鍋（豬肉片+豆腐+菇類）","晚：希臘優格 + 燕麥 + 香蕉"],prot:132,kcal:1700},
+  {day:7,meals:["早：義式雞胸肉 + 鮮奶250ml","午：滷豬腱 + 燙青菜 + 半碗飯","晚：鮭魚100g + 燕麥50g"],prot:130,kcal:1680},
+];
 
-/* ═══════════════════════════════════
-   HOOKS
-═══════════════════════════════════ */
-function useRipple(){
-  const ref=useRef(null);
-  const fire=useCallback(e=>{
-    const el=ref.current;if(!el)return;
-    const rect=el.getBoundingClientRect(),size=Math.max(rect.width,rect.height);
-    const dot=document.createElement("span");dot.className="rd";
-    const cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    const cy=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-    dot.style.cssText=`width:${size}px;height:${size}px;left:${cx-size/2}px;top:${cy-size/2}px`;
-    el.appendChild(dot);setTimeout(()=>dot.remove(),620);
-  },[]);
-  return[ref,fire];
+/* ════════════════════════════════════
+   STORAGE — single source of truth
+════════════════════════════════════ */
+const DEFAULT_STATE = {
+  gender: "male",
+  weight: "",
+  height: "",
+  age: "",
+  act: 1.55,
+  goal: "muscle",
+  neaChecked: [],
+  logs: [],
+  trackEntries: [],
+  isVip: false,
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return {...DEFAULT_STATE};
+    const saved = JSON.parse(raw);
+    return {...DEFAULT_STATE, ...saved};
+  } catch(e) {
+    return {...DEFAULT_STATE};
+  }
 }
 
-/* ═══════════════════════════════════
-   COMPONENTS
-═══════════════════════════════════ */
+function saveState(state) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
 
-/* Ticker */
-const Ticker=memo(()=>{
-  const items=[...DAVID_RANTS,...DAVID_RANTS].map(r=>r.text);
-  return(
-    <div style={{overflow:"hidden",background:"#0a0a08",borderBottom:"1px solid #ccff0012",padding:"8px 0",cursor:"default"}}>
-      <div className="tick">
-        {items.map((q,i)=>(
-          <span key={i} style={{display:"inline-flex",alignItems:"center",gap:0,whiteSpace:"nowrap"}}>
-            <span style={{fontSize:12,fontWeight:600,color:"#9CA3AF",padding:"0 22px"}}>{q}</span>
-            <span style={{fontSize:13,color:"#CCFF00",opacity:.35}}>◆</span>
-          </span>
-        ))}
-      </div>
+/* ════════════════════════════════════
+   UTILS
+════════════════════════════════════ */
+const isoToday = () => new Date().toISOString().slice(0,10);
+const fmtDate  = iso => { const[,m,d]=iso.split("-"); return `${m}/${d}`; };
+
+function calcTDEE(gender, weight, height, age, act, neaChecked) {
+  const w=parseFloat(weight), h=parseFloat(height), a=parseInt(age);
+  if (!w||!h||!a||w<20||h<100||a<10) return null;
+  const bmr = gender==="male"
+    ? 10*w + 6.25*h - 5*a + 5
+    : 10*w + 6.25*h - 5*a - 161;
+  const neaBonus = (neaChecked||[]).length * 80;
+  return Math.round(bmr * act) + neaBonus;
+}
+
+function calcGoalTarget(tdee, goalId) {
+  if (goalId==="muscle") return {target: tdee+300, label:"增肌目標", delta:"+300 kcal", color:"#CCFF00"};
+  if (goalId==="cut")    return {target: Math.max(tdee-400,1200), label:"減脂目標", delta:"-400 kcal", color:"#FF9500"};
+  return {target: tdee, label:"維持目標", delta:"±0 kcal", color:"#38BDF8"};
+}
+
+function calcProt(weight, goalId) {
+  const w = parseFloat(weight);
+  if (!w) return null;
+  return Math.round(w * (goalId==="cut" ? 1.6 : 1.8));
+}
+
+function calcStreak(logs) {
+  if (!logs||!logs.length) return 0;
+  const sorted = [...logs].sort((a,b)=>b.date.localeCompare(a.date));
+  let count = 0;
+  let cur = new Date(); cur.setHours(0,0,0,0);
+  for (const l of sorted) {
+    const ld = new Date(l.date+"T00:00:00");
+    if (Math.round((cur-ld)/86400000) <= 1) { count++; cur=ld; }
+    else break;
+  }
+  return count;
+}
+
+/* ════════════════════════════════════
+   RIPPLE HOOK
+════════════════════════════════════ */
+function useRipple() {
+  const ref = useRef(null);
+  const fire = useCallback(e => {
+    const el = ref.current; if(!el) return;
+    const r = el.getBoundingClientRect(), sz = Math.max(r.width, r.height);
+    const dot = document.createElement("span"); dot.className="rd";
+    const cx = (e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const cy = (e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    dot.style.cssText = `width:${sz}px;height:${sz}px;left:${cx-sz/2}px;top:${cy-sz/2}px`;
+    el.appendChild(dot); setTimeout(()=>dot.remove(), 550);
+  },[]);
+  return [ref, fire];
+}
+
+/* ════════════════════════════════════
+   SHARED COMPONENTS
+════════════════════════════════════ */
+
+const Ticker = memo(() => (
+  <div style={{overflow:"hidden",background:"#0a0a08",borderBottom:"1px solid #ccff0010",padding:"8px 0",cursor:"default"}}>
+    <div className="tick">
+      {[...DAVID_RANTS,...DAVID_RANTS].map((r,i) => (
+        <span key={i} style={{display:"inline-flex",alignItems:"center",whiteSpace:"nowrap"}}>
+          <span style={{fontSize:12,fontWeight:600,color:"#9CA3AF",padding:"0 20px"}}>{r.mood} {r.text}</span>
+          <span style={{fontSize:13,color:"#CCFF00",opacity:.3}}>◆</span>
+        </span>
+      ))}
     </div>
-  );
-});
+  </div>
+));
 
-/* Toast */
-function Toast({msg,onDone}){
-  const[out,setOut]=useState(false);
-  useEffect(()=>{const a=setTimeout(()=>setOut(true),2900);const b=setTimeout(onDone,3300);return()=>{clearTimeout(a);clearTimeout(b);};},[]);
-  return(
-    <div className={out?"tout":"tin"} style={{position:"fixed",bottom:100,left:"50%",background:"#0f0f0f",border:"1.5px solid #CCFF00",borderRadius:16,padding:"13px 20px",maxWidth:330,width:"88%",fontSize:13,color:"#D1D5DB",lineHeight:1.8,zIndex:9999,boxShadow:"0 0 36px rgba(204,255,0,.28)"}}>
+function Toast({msg, onDone}) {
+  const [out, setOut] = useState(false);
+  useEffect(() => {
+    const a = setTimeout(()=>setOut(true), 2900);
+    const b = setTimeout(onDone, 3300);
+    return () => { clearTimeout(a); clearTimeout(b); };
+  }, []);
+  return (
+    <div className={out?"tout":"tin"} style={{position:"fixed",bottom:100,left:"50%",background:"#0f0f0f",border:"1.5px solid #CCFF00",borderRadius:16,padding:"13px 20px",maxWidth:330,width:"88%",fontSize:13,color:"#D1D5DB",lineHeight:1.8,zIndex:9999,boxShadow:"0 0 36px rgba(204,255,0,.25)"}}>
       <span style={{color:"#CCFF00",fontWeight:900,marginRight:7}}>💬</span>{msg}
     </div>
   );
 }
 
-/* David Persona Block */
-function DavidPersona({onTired}){
-  const[idx,setIdx]=useState(()=>Math.floor(Math.random()*DAVID_RANTS.length));
-  const r=DAVID_RANTS[idx];
-  const[ref,fire]=useRipple();
-  const next=()=>setIdx(i=>(i+1)%DAVID_RANTS.length);
-  return(
-    <div style={{background:"linear-gradient(135deg,#0e0e0a,#121210)",border:"1.5px solid #ccff0028",borderRadius:18,padding:"18px 17px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,borderRadius:"50%",background:"radial-gradient(circle,#ccff000c,transparent 70%)",pointerEvents:"none"}}/>
-      {/* header */}
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-        <div className="persona-bob" style={{width:42,height:42,background:"linear-gradient(135deg,#CCFF00,#aaee00)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:"0 0 18px rgba(204,255,0,.35)"}}>💬</div>
-        <div style={{flex:1}}>
-          <div style={{fontSize:11,color:"#CCFF00",letterSpacing:2.5,fontWeight:800}}>大衛教練碎碎念</div>
-          <div style={{fontSize:9,color:"#4B5563",marginTop:1}}>{new Date().toLocaleDateString("zh-TW",{month:"long",day:"numeric"})} · 隨機輪播</div>
-        </div>
-        <button onClick={next} className="tap" style={{width:30,height:30,borderRadius:"50%",border:"1px solid #ccff0030",background:"transparent",color:"#CCFF00",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>↻</button>
-      </div>
-      {/* quote */}
-      <div className="ai" key={idx} style={{marginBottom:10}}>
-        <div style={{fontSize:26,marginBottom:8}}>{r.mood}</div>
-        <div style={{fontSize:14,fontWeight:800,color:"#F9FAFB",lineHeight:1.8,marginBottom:6}}>{r.text}</div>
-        <div style={{fontSize:11,color:"#6B7280",lineHeight:1.6,borderLeft:"2px solid #CCFF00",paddingLeft:10}}>{r.sub}</div>
-      </div>
-      {/* actions */}
-      <div style={{display:"flex",gap:8,marginTop:14}}>
-        <button ref={ref} onClick={e=>{fire(e);onTired();}} className="rh tap"
-          style={{flex:1,padding:"11px 0",borderRadius:11,border:"1.5px solid #ccff0035",background:"transparent",color:"#CCFF00",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-          <span>😮‍💨</span><span>我很累 / 心靈補給</span>
-        </button>
-        <button onClick={()=>window.open(LINKTREE,"_blank")} className="rh tap"
-          style={{flexShrink:0,padding:"11px 16px",borderRadius:11,border:"none",background:"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",fontSize:12,fontWeight:900,cursor:"pointer"}}>
-          📅 預約
-        </button>
+function Modal({children, onBgClick, borderColor}) {
+  return (
+    <div className="mb ai" onClick={e=>{ if(e.target===e.currentTarget && onBgClick) onBgClick(); }}>
+      <div className="mx cr" style={borderColor?{border:`1.5px solid ${borderColor}`}:{}}>
+        {children}
       </div>
     </div>
   );
 }
 
-/* Tired Modal */
-function TiredModal({onClose}){
-  const[r]=useState(()=>TIRED_MSGS[Math.floor(Math.random()*TIRED_MSGS.length)]);
-  const[ref,fire]=useRipple();
-  return(
-    <div className="mb ai" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="mx cr" style={{border:`1.5px solid ${r.c}32`,boxShadow:`0 0 80px ${r.c}12`}}>
-        <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
-        <div style={{textAlign:"center",marginBottom:20}}>
-          <div className="hb" style={{fontSize:52,marginBottom:10}}>{r.icon}</div>
-          <div style={{fontSize:13,fontWeight:900,color:r.c,letterSpacing:2,marginBottom:6}}>{r.title}</div>
-          <div style={{height:1,background:`linear-gradient(90deg,transparent,${r.c}40,transparent)`,marginBottom:16}}/>
-          <div style={{fontSize:13,color:"#D1D5DB",lineHeight:1.95,whiteSpace:"pre-wrap",textAlign:"left",padding:"0 4px"}}>{r.msg}</div>
-        </div>
-        <button ref={ref} onClick={e=>{fire(e);onClose();}} className="rh gg tap"
-          style={{width:"100%",padding:16,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:13,cursor:"pointer",fontSize:15,fontWeight:900,color:"#000"}}>
-          謝謝教練，我繼續了 💪
-        </button>
-        <div style={{textAlign:"center",marginTop:12}}>
-          <button onClick={()=>lineConsult()} className="tap"
-            style={{fontSize:12,color:"#6B7280",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>
-            需要更多支持？LINE 大衛教練
-          </button>
-        </div>
+/* VIP Upgrade Prompt (for non-VIP blocking) */
+function VIPPromptModal({feature, onClose, onGoLine, onGoUnlock}) {
+  const [ref,fire] = useRipple();
+  return (
+    <Modal onBgClick={onClose} borderColor="rgba(255,215,0,.3)">
+      <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
+      <div style={{textAlign:"center",marginBottom:22}}>
+        <div style={{fontSize:42,marginBottom:10}}>👑</div>
+        <div style={{fontSize:11,letterSpacing:3,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:6}}>VIP 專屬功能</div>
+        <div style={{fontSize:17,fontWeight:900,color:"#F9FAFB",marginBottom:6}}>{feature}</div>
+        <div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(255,215,0,.32),transparent)",margin:"12px 0"}}/>
+        <div style={{fontSize:12,color:"#D1D5DB",lineHeight:2}}>此功能需要 VIP 解鎖才能使用。<br/>透過 LINE 聯繫大衛教練確認付款後，即可取得解鎖碼。</div>
       </div>
-    </div>
+      <button ref={ref} onClick={e=>{fire(e);onGoLine();}} className="rh gf tap"
+        style={{width:"100%",padding:16,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:13,cursor:"pointer",fontSize:15,fontWeight:900,color:"#000",marginBottom:10,lineHeight:1.6}}>
+        💬 LINE 大衛教練<br/><span style={{fontSize:11,fontWeight:700,opacity:.85}}>NT$199 · 取得解鎖碼</span>
+      </button>
+      <button onClick={onGoUnlock} className="tap"
+        style={{width:"100%",padding:13,background:"transparent",border:"1.5px solid #ccff0028",borderRadius:13,cursor:"pointer",fontSize:13,fontWeight:700,color:"#CCFF00"}}>
+        已有解鎖碼，直接輸入 →
+      </button>
+    </Modal>
   );
 }
 
-/* VIP Unlock Modal */
-function VIPUnlockModal({onUnlock,onClose}){
-  const[code,setCode]=useState("");
-  const[err,setErr]=useState("");
-  const[btnRef,btnFire]=useRipple();
-  const tryUnlock=e=>{
-    btnFire(e);
-    if(code.trim().toUpperCase()===VIP_CODE){onUnlock();}
-    else{setErr("解鎖碼錯誤，請確認後再試，或 LINE 聯繫教練取得正確代碼。");}
+/* VIP Unlock Code Modal */
+function VIPUnlockModal({onUnlock, onClose}) {
+  const [code, setCode] = useState("");
+  const [err,  setErr]  = useState("");
+  const [ref,fire] = useRipple();
+  const tryUnlock = (e) => {
+    fire(e);
+    if (code.trim().toUpperCase() === VIP_CODE) { onUnlock(); }
+    else { setErr("解鎖碼錯誤，請確認後再試。"); }
   };
-  return(
-    <div className="mb ai" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="mx cr" style={{border:"1.5px solid rgba(255,215,0,.3)",boxShadow:"0 0 80px rgba(255,215,0,.1)"}}>
-        <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
-        <div style={{textAlign:"center",marginBottom:22}}>
-          <div style={{fontSize:42,marginBottom:8}}>🔐</div>
-          <div style={{fontSize:11,letterSpacing:3,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:6}}>輸入 VIP 解鎖碼</div>
-          <div style={{fontSize:16,fontWeight:900,color:"#F9FAFB",marginBottom:6}}>解鎖全套 7 天計畫</div>
-          <div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(255,215,0,.35),transparent)",margin:"12px 0"}}/>
-          <div style={{fontSize:12,color:"#9CA3AF",lineHeight:1.9}}>已向大衛教練付款後，輸入你的專屬解鎖碼<br/>立刻開啟所有 VIP 功能</div>
+  return (
+    <Modal onBgClick={onClose} borderColor="rgba(255,215,0,.3)">
+      <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:40,marginBottom:8}}>🔐</div>
+        <div style={{fontSize:11,letterSpacing:3,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:6}}>輸入 VIP 解鎖碼</div>
+        <div style={{fontSize:16,fontWeight:900,color:"#F9FAFB",marginBottom:6}}>解鎖全套 7 天計畫</div>
+        <div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(255,215,0,.32),transparent)",margin:"12px 0"}}/>
+        <div style={{fontSize:12,color:"#9CA3AF",lineHeight:1.9}}>
+          透過 LINE 跟大衛教練確認付款後，即可取得本月解鎖碼。<br/>付款後輸入代碼，即可永久解鎖所有功能。
         </div>
-        <input value={code} onChange={e=>{setCode(e.target.value);setErr("");}} onKeyDown={e=>{if(e.key==="Enter")tryUnlock(e);}}
-          placeholder="輸入解鎖碼（例：DAVIDXXX）"
-          autoCapitalize="characters"
-          style={{width:"100%",background:"#0a0a0a",border:`1.5px solid ${err?"#FF4444":"#2a2a2a"}`,borderRadius:12,color:"#F9FAFB",padding:"14px 16px",fontSize:15,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",letterSpacing:3,textAlign:"center",transition:"border-color .2s",marginBottom:err?6:14}}/>
-        {err&&<div style={{fontSize:11,color:"#FF4444",marginBottom:12,textAlign:"center"}}>{err}</div>}
-        <button ref={btnRef} onClick={tryUnlock} className="rh gg tap"
-          style={{width:"100%",padding:16,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:13,cursor:"pointer",fontSize:15,fontWeight:900,color:"#000",marginBottom:12}}>
-          🔓 解鎖 VIP 功能
-        </button>
-        <div style={{height:1,background:"linear-gradient(90deg,transparent,#2a2a2a,transparent)",margin:"12px 0"}}/>
-        <div style={{textAlign:"center"}}>
-          <div style={{fontSize:12,color:"#9CA3AF",marginBottom:10}}>還沒有解鎖碼？</div>
-          <button onClick={lineConsult} className="rh gf tap"
-            style={{width:"100%",padding:15,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:13,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",lineHeight:1.65}}>
-            💬 LINE 大衛教練<br/><span style={{fontSize:11,fontWeight:700,opacity:.8}}>預約諮詢 + 取得解鎖碼 · NT$199</span>
-          </button>
-        </div>
-        <div style={{textAlign:"center",marginTop:12,fontSize:10,color:"#374151"}}>大衛教練親自設計的科學邏輯</div>
       </div>
-    </div>
+      <input
+        value={code} onChange={e=>{setCode(e.target.value);setErr("");}}
+        onKeyDown={e=>{if(e.key==="Enter")tryUnlock(e);}}
+        placeholder="輸入解鎖碼（例：DAVIDXXX）"
+        autoCapitalize="characters"
+        style={{width:"100%",background:"#0a0a0a",border:`1.5px solid ${err?"#FF4444":"#2a2a2a"}`,borderRadius:12,color:"#F9FAFB",padding:"14px 16px",fontSize:15,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",letterSpacing:3,textAlign:"center",marginBottom:err?6:14,transition:"border-color .2s"}}
+      />
+      {err && <div style={{fontSize:11,color:"#FF4444",marginBottom:12,textAlign:"center"}}>{err}</div>}
+      <button ref={ref} onClick={tryUnlock} className="rh gg tap"
+        style={{width:"100%",padding:16,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:13,cursor:"pointer",fontSize:15,fontWeight:900,color:"#000",marginBottom:12}}>
+        🔓 解鎖 VIP 功能
+      </button>
+      <div style={{height:1,background:"linear-gradient(90deg,transparent,#2a2a2a,transparent)",margin:"12px 0"}}/>
+      <button onClick={lineVipUnlock} className="rh gf tap"
+        style={{width:"100%",padding:15,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:13,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",lineHeight:1.65}}>
+        💬 LINE 大衛教練取得解鎖碼<br/><span style={{fontSize:11,fontWeight:700,opacity:.85}}>NT$199 · 一次解鎖，永久使用</span>
+      </button>
+    </Modal>
   );
 }
 
-/* VIP Activated */
-function VIPActivated({onClose}){
-  useEffect(()=>{setTimeout(onClose,3200);},[]);
-  return(
+/* VIP Activated Confirmation */
+function VIPActivated({onClose}) {
+  useEffect(()=>{ setTimeout(onClose, 3000); },[]);
+  return (
     <div className="mb ai">
-      <div className="mx cr" style={{border:"1.5px solid rgba(255,215,0,.6)",boxShadow:"0 0 100px rgba(255,215,0,.22)",textAlign:"center",padding:"42px 24px"}}>
-        <div style={{fontSize:58,marginBottom:12}}>👑</div>
+      <div className="mx cr" style={{border:"1.5px solid rgba(255,215,0,.6)",textAlign:"center",padding:"42px 24px"}}>
+        <div style={{fontSize:56,marginBottom:12}}>👑</div>
         <div className="vs" style={{fontSize:28,fontWeight:900,letterSpacing:3,marginBottom:6,fontFamily:"'Bebas Neue',sans-serif"}}>VIP 已啟動</div>
         <div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(255,215,0,.5),transparent)",margin:"14px 0"}}/>
         <div style={{fontSize:13,color:"#D1D5DB",lineHeight:2.1}}>
-          ✅ 7 天完整計畫 已解鎖<br/>✅ AI 拍照送教練審核 已解鎖<br/>✅ 大衛教練私訊優先通道 已解鎖
+          ✅ 7 天完整計畫 已解鎖<br/>
+          ✅ AI 拍照送教練審核 已解鎖<br/>
+          ✅ 大衛教練私訊優先通道 已解鎖
         </div>
         <div style={{marginTop:14,fontSize:12,color:"#6B7280"}}>感謝你的信任，大衛教練與你同行 💪</div>
       </div>
@@ -515,1078 +450,1194 @@ function VIPActivated({onClose}){
   );
 }
 
-/* Premium Modal */
-function PremiumModal({feature,onClose,onShowUnlock}){
-  const[ref,fire]=useRipple();
-  return(
-    <div className="mb ai" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="mx cr" style={{border:"1.5px solid rgba(255,215,0,.22)"}}>
-        <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
-        <div style={{textAlign:"center",marginBottom:20}}>
-          <div style={{fontSize:36,marginBottom:8}}>🔒</div>
-          <div style={{fontSize:11,letterSpacing:3,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:6}}>VIP 功能</div>
-          <div style={{fontSize:18,fontWeight:900,color:"#F9FAFB",marginBottom:8}}>{feature}</div>
-          <div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(255,215,0,.3),transparent)",margin:"10px 0"}}/>
-          <div style={{fontSize:12,color:"#9CA3AF",lineHeight:1.95}}>
-            解鎖方式：<span style={{color:"#FFD700",fontWeight:800}}>LINE 私訊大衛教練</span><br/>
-            確認付款 NT$199 後即時取得解鎖碼<br/>
-            <span style={{fontSize:11,color:"#4B5563"}}>輸入代碼後所有功能永久解鎖</span>
-          </div>
-        </div>
-        {[["📋","第 2–7 天訓練計畫","每日漸進設計，完整週期規劃"],["🍽️","私藏外食避坑指南","50+ 場景完整攻略"],["📷","AI 照片送教練審核","真人回覆，建立服務依賴"],["👑","私訊優先通道","大衛教練親自優先回覆"]].map(([i,t,s])=>(
-          <div key={t} style={{display:"flex",gap:12,padding:"9px 0",borderBottom:"1px solid #1a1a1a",alignItems:"center"}}>
-            <span style={{fontSize:19,flexShrink:0}}>{i}</span>
-            <div><div style={{fontSize:13,fontWeight:700,color:"#E5E7EB"}}>{t}</div><div style={{fontSize:11,color:"#4B5563",marginTop:1}}>{s}</div></div>
-          </div>
-        ))}
-        <div style={{textAlign:"center",margin:"18px 0 8px"}}>
-          <div style={{fontSize:13,color:"#374151",textDecoration:"line-through",marginBottom:2}}>原價 NT$499</div>
-          <div style={{fontSize:38,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",letterSpacing:2,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>NT$199</div>
-        </div>
-        <button ref={ref} onClick={e=>{fire(e);lineConsult();}} className="rh gf tap"
-          style={{width:"100%",padding:16,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:13,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",lineHeight:1.7,marginBottom:10}}>
-          💬 前往 LINE 領取解鎖碼 & 預約諮詢
-        </button>
-        <button onClick={()=>{onClose();onShowUnlock();}} className="tap"
-          style={{width:"100%",padding:12,background:"transparent",border:"1.5px solid #ccff0028",borderRadius:13,cursor:"pointer",fontSize:13,fontWeight:700,color:"#CCFF00"}}>
-          已有解鎖碼，直接輸入 →
+/* Tired Modal */
+function TiredModal({onClose}) {
+  const [r] = useState(()=>TIRED_MSGS[Math.floor(Math.random()*TIRED_MSGS.length)]);
+  const [ref,fire] = useRipple();
+  return (
+    <Modal onBgClick={onClose} borderColor={`${r.c}30`}>
+      <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div className="hb" style={{fontSize:52,marginBottom:10}}>{r.icon}</div>
+        <div style={{fontSize:13,fontWeight:900,color:r.c,letterSpacing:2,marginBottom:6}}>{r.title}</div>
+        <div style={{height:1,background:`linear-gradient(90deg,transparent,${r.c}38,transparent)`,marginBottom:16}}/>
+        <div style={{fontSize:13,color:"#D1D5DB",lineHeight:1.95,whiteSpace:"pre-wrap",textAlign:"left"}}>{r.msg}</div>
+      </div>
+      <button ref={ref} onClick={e=>{fire(e);onClose();}} className="rh gg tap"
+        style={{width:"100%",padding:16,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:13,cursor:"pointer",fontSize:15,fontWeight:900,color:"#000"}}>
+        謝謝教練，我繼續了 💪
+      </button>
+      <div style={{textAlign:"center",marginTop:11}}>
+        <button onClick={lineConsult} className="tap" style={{fontSize:12,color:"#6B7280",background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>
+          需要更多支持？LINE 大衛教練
         </button>
       </div>
-    </div>
+    </Modal>
   );
 }
 
-/* Photo Audit Modal (VIP) */
-function PhotoAuditModal({res,onClose}){
-  const[phase,setPhase]=useState("idle"); // idle | captured | sending
-  const[photoUrl,setPhotoUrl]=useState(null);
-  const fileRef=useRef(null);
-  const[ref,fire]=useRipple();
+/* Photo Audit Modal — VIP only */
+function PhotoAuditModal({res, onClose}) {
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [phase, setPhase] = useState("idle"); // idle | captured
+  const fileRef = useRef(null);
+  const [ref,fire] = useRipple();
 
-  const handleCapture=e=>{
-    const file=e.target.files?.[0];
-    if(!file)return;
-    const url=URL.createObjectURL(file);
-    setPhotoUrl(url);setPhase("captured");
+  const handleFile = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoUrl(URL.createObjectURL(file));
+    setPhase("captured");
   };
 
-  const handleSend=e=>{
-    fire(e);setPhase("sending");
-    setTimeout(()=>{
-      linePhotoAudit(res?.tdee,res?.goalLabel,res?.prot);
-      onClose();
-    },800);
+  const handleSend = e => {
+    fire(e);
+    linePhotoAudit(res?.tdee, res?.goalLabel, res?.prot);
+    setTimeout(onClose, 400);
   };
 
-  return(
-    <div className="mb ai" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="mx cr" style={{border:"1.5px solid rgba(56,189,248,.3)"}}>
-        <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
-        <div style={{marginBottom:20}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-            <div style={{width:40,height:40,background:"#38BDF820",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,border:"1px solid #38BDF830",flexShrink:0}}>📷</div>
-            <div>
-              <div style={{fontSize:14,fontWeight:900,color:"#38BDF8"}}>拍照送教練審核</div>
-              <div style={{fontSize:10,color:"#4B5563"}}>大衛教練親自分析你的餐點</div>
-            </div>
-            <div className="bp" style={{marginLeft:"auto",padding:"3px 9px",background:"linear-gradient(135deg,#FFD700,#FF8800)",borderRadius:20,fontSize:10,fontWeight:900,color:"#000"}}>👑 VIP</div>
-          </div>
-          {/* photo area */}
-          <div className="photo-frame" style={{marginBottom:14,cursor:"pointer"}} onClick={()=>fileRef.current?.click()}>
-            {photoUrl?(
-              <img src={photoUrl} alt="食物照片" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-            ):(
-              <div style={{textAlign:"center",padding:20}}>
-                <div style={{fontSize:40,marginBottom:10}}>📸</div>
-                <div style={{fontSize:13,color:"#CCFF00",fontWeight:700,marginBottom:4}}>點擊拍照或選擇相片</div>
-                <div style={{fontSize:11,color:"#4B5563"}}>讓大衛教練幫你看這餐的營養比例</div>
-              </div>
-            )}
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleCapture} style={{display:"none"}}/>
-          </div>
-          {/* info */}
-          {res&&(
-            <div style={{background:"#111",borderRadius:11,padding:"10px 13px",marginBottom:14,border:"1px solid #ccff0020"}}>
-              <div style={{fontSize:10,color:"#4B5563",marginBottom:6,letterSpacing:1}}>將一併傳送給教練的資料</div>
-              <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-                {[["TDEE",res.tdee+"kcal","#CCFF00"],["目標",res.goalLabel,"#FF9500"],["蛋白質目標",res.prot+"g/日","#38BDF8"]].map(([l,v,c])=>(
-                  <div key={l}><div style={{fontSize:9,color:"#4B5563"}}>{l}</div><div style={{fontSize:13,fontWeight:800,color:c}}>{v}</div></div>
-                ))}
-              </div>
-            </div>
-          )}
-          {!res&&(
-            <div style={{background:"#1a1208",borderRadius:11,padding:"10px 13px",marginBottom:14,border:"1px solid #FF950030",fontSize:11,color:"#FF9500"}}>
-              💡 建議先完成 TDEE 計算，教練會收到更完整的資料
-            </div>
-          )}
-        </div>
-        {phase==="idle"&&(
-          <button onClick={()=>fileRef.current?.click()} className="rh gb tap"
-            style={{width:"100%",padding:15,background:"linear-gradient(135deg,#38BDF8,#0ea5e9)",border:"none",borderRadius:13,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000"}}>
-            📷 開啟相機拍照
-          </button>
-        )}
-        {phase==="captured"&&(
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
-            <button onClick={()=>{setPhotoUrl(null);setPhase("idle");fileRef.current.value="";}} className="tap"
-              style={{padding:14,borderRadius:13,border:"1.5px solid #ccff0030",background:"transparent",color:"#CCFF00",cursor:"pointer",fontSize:13,fontWeight:700}}>
-              重新拍攝
-            </button>
-            <button ref={ref} onClick={handleSend} className="rh gb tap"
-              style={{padding:14,background:"linear-gradient(135deg,#38BDF8,#0ea5e9)",border:"none",borderRadius:13,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>
-              <span>💬</span><span>一鍵傳送給教練</span>
-            </button>
-          </div>
-        )}
-        {phase==="sending"&&(
-          <div style={{textAlign:"center",padding:"16px 0",color:"#CCFF00",fontSize:14,fontWeight:700}}>
-            正在連接 LINE…
-            <div style={{display:"flex",justifyContent:"center",gap:5,marginTop:10}}>
-              {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"#CCFF00",animation:`dotP 1.2s ease-in-out ${i*.2}s infinite`}}/>)}
-            </div>
-          </div>
-        )}
-        <div style={{textAlign:"center",marginTop:12,fontSize:11,color:"#374151"}}>教練將於 24 小時內透過 LINE 回覆你</div>
-      </div>
-    </div>
-  );
-}
-
-/* Streak Bar */
-function StreakBar({streak,cnt}){
-  const fire=streak>=7;const pct=Math.min((streak/30)*100,100);
-  return(
-    <div style={{background:"#0c0c0c",borderRadius:16,padding:18,border:"1px solid #ccff0014",marginBottom:14}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <div style={{fontSize:13,fontWeight:800,color:fire?"#ffdd00":"#CCFF00"}}>{fire?"🔥":"⚡"} {streak} 天連續逆襲</div>
-        <div style={{fontSize:11,color:"#4B5563",fontFamily:"'JetBrains Mono',monospace"}}>{cnt}/{MAX_DAYS}</div>
-      </div>
-      <div style={{height:8,background:"#1a1a1a",borderRadius:4,overflow:"hidden"}}>
-        <div className="bf" style={{"--w":`${pct}%`,height:"100%",borderRadius:4,background:fire?"linear-gradient(90deg,#ff5500,#ffdd00,#ff5500)":"linear-gradient(90deg,#CCFF00,#aaee00)"}}/>
-      </div>
-      <div style={{display:"flex",justifyContent:"space-between",marginTop:11}}>
-        {[7,14,21,30].map(m=>{const d=streak>=m;return(
-          <div key={m} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-            <div style={{width:22,height:22,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,background:d?"#CCFF00":"#1f1f1f",color:d?"#000":"#2d2d2d",border:`1.5px solid ${d?"#CCFF00":"#252525"}`}}>{d?"✓":m}</div>
-            <div style={{fontSize:9,color:d?"#CCFF00":"#2d2d2d"}}>{m}天</div>
-          </div>
-        );})}
-      </div>
-    </div>
-  );
-}
-
-function BadgePop({streak}){
-  const cfg=streak>=30?{i:"👑",l:"增肌傳說",s:"30天全勤",c:"#FFD700"}:streak>=21?{i:"🏆",l:"三週勇士",s:"意志力超越95%",c:"#FF9500"}:streak>=14?{i:"💎",l:"雙週挑戰者",s:"習慣已成型！",c:"#38BDF8"}:streak>=7?{i:"🔥",l:"黃金火焰",s:"燃燒模式啟動",c:"#ffdd00"}:streak>=3?{i:"⚡",l:"初醒戰士",s:"好的開始！",c:"#CCFF00"}:null;
-  if(!cfg)return null;
-  return(
-    <div className="bp" style={{display:"flex",alignItems:"center",gap:13,background:`linear-gradient(135deg,${cfg.c}14,${cfg.c}04)`,border:`1.5px solid ${cfg.c}44`,borderRadius:14,padding:"12px 16px",marginBottom:14}}>
-      <div style={{fontSize:30,flexShrink:0}}>{cfg.i}</div>
-      <div><div style={{fontSize:14,fontWeight:900,color:cfg.c}}>{cfg.l}</div><div style={{fontSize:11,color:"#6B7280",marginTop:2}}>{cfg.s}</div></div>
-    </div>
-  );
-}
-
-function GoalSelector({goal,setGoal}){
-  return(
-    <div style={{marginBottom:14}}>
-      <div style={{fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:12}}>🎯 選擇目標 GOAL</div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-        {GOALS.map(g=>{const a=goal===g.id;return(
-          <button key={g.id} onClick={()=>setGoal(g.id)} className={`rh tap${a?" gp":""}`}
-            style={{padding:"14px 5px",borderRadius:14,border:`1.5px solid ${a?g.color:g.color+"1a"}`,cursor:"pointer",transition:"all .25s",textAlign:"center",background:a?`${g.color}0e`:"transparent"}}>
-            <div style={{fontSize:23,marginBottom:5}}>{g.icon}</div>
-            <div style={{fontSize:13,fontWeight:900,color:a?g.color:"#6B7280"}}>{g.label}</div>
-            <div style={{fontSize:9,color:a?g.color+"bb":"#374151",marginTop:3,lineHeight:1.4}}>{g.sub}</div>
-          </button>
-        );})}
-      </div>
-    </div>
-  );
-}
-
-/* ── Day 1 Free Preview ── */
-function Day1Preview(){
-  const[tab,setTab]=useState("workout");
-  const p=DAY1_PLAN;
-  return(
-    <div style={{background:"#0c0c0a",borderRadius:16,border:"1.5px solid #ccff0030",overflow:"hidden",marginBottom:14}}>
-      {/* free badge */}
-      <div style={{background:"linear-gradient(135deg,#ccff0015,#ccff0008)",padding:"10px 16px",borderBottom:"1px solid #ccff0018",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+  return (
+    <Modal onBgClick={onClose} borderColor="rgba(56,189,248,.3)">
+      <button onClick={onClose} style={{position:"absolute",top:14,right:17,background:"none",border:"none",color:"#4B5563",fontSize:20,cursor:"pointer"}}>✕</button>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+        <div style={{width:40,height:40,background:"#38BDF820",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,border:"1px solid #38BDF830",flexShrink:0}}>📷</div>
         <div>
-          <span style={{fontSize:11,fontWeight:900,color:"#CCFF00",letterSpacing:1}}>第 1 天計畫</span>
-          <span style={{fontSize:10,color:"#6B7280",marginLeft:8}}>免費體驗完整服務</span>
+          <div style={{fontSize:14,fontWeight:900,color:"#38BDF8"}}>拍照送教練審核</div>
+          <div style={{fontSize:10,color:"#4B5563"}}>大衛教練親自分析你的餐點</div>
         </div>
-        <div style={{padding:"3px 10px",background:"#CCFF00",borderRadius:20,fontSize:10,fontWeight:900,color:"#000"}}>FREE</div>
+        <div className="bp" style={{marginLeft:"auto",padding:"3px 9px",background:"linear-gradient(135deg,#FFD700,#FF8800)",borderRadius:20,fontSize:10,fontWeight:900,color:"#000"}}>👑 VIP</div>
       </div>
-      {/* tab */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",borderBottom:"1px solid #1a1a1a"}}>
-        {[["workout","🏋️ 今日訓練"],["breakfast","🍳 今日飲食"]].map(([t,l])=>(
-          <button key={t} onClick={()=>setTab(t)} className="tap"
-            style={{padding:"10px 0",border:"none",cursor:"pointer",fontSize:12,fontWeight:800,transition:"all .2s",background:tab===t?"#ccff0015":"transparent",color:tab===t?"#CCFF00":"#4B5563",borderBottom:tab===t?"2px solid #CCFF00":"2px solid transparent"}}>
-            {l}
-          </button>
-        ))}
-      </div>
-      <div style={{padding:"15px 15px"}}>
-        {tab==="workout"&&(
-          <div className="ai">
-            <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:4}}>{p.workout.title}</div>
-            <div style={{fontSize:11,color:"#6B7280",marginBottom:12,borderLeft:"2px solid #CCFF00",paddingLeft:9}}>{p.workout.note}</div>
-            {p.workout.exercises.map((ex,i)=>(
-              <div key={i} style={{background:"#111",borderRadius:11,padding:"11px 13px",marginBottom:8,border:"1px solid #1f1f1f"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
-                  <div style={{fontSize:13,fontWeight:800,color:"#E5E7EB"}}>{ex.name}</div>
-                  <div style={{display:"flex",gap:5,flexShrink:0}}>
-                    <span style={{fontSize:10,background:"#ccff0018",color:"#CCFF00",padding:"2px 7px",borderRadius:5,fontWeight:700}}>{ex.sets}組</span>
-                    <span style={{fontSize:10,background:"#FF950018",color:"#FF9500",padding:"2px 7px",borderRadius:5,fontWeight:700}}>{ex.reps}</span>
-                  </div>
-                </div>
-                <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.75,borderLeft:"2px solid #ccff0030",paddingLeft:9}}>
-                  <span style={{color:"#CCFF00",fontWeight:700}}>教練：</span>{ex.tip}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {tab==="breakfast"&&(
-          <div className="ai">
-            <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:12}}>{p.breakfast.title}</div>
-            {p.breakfast.items.map((item,i)=>(
-              <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:"1px solid #1a1a1a"}}>
-                <div>
-                  <div style={{fontSize:13,fontWeight:700,color:"#E5E7EB"}}>{item.food}</div>
-                  <div style={{fontSize:11,color:"#6B7280",marginTop:2}}>{item.note}</div>
-                </div>
-                <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#CCFF00"}}>{item.kcal}kcal</div>
-                  <div style={{fontSize:11,color:"#FF9500"}}>蛋白{item.prot}g</div>
-                </div>
-              </div>
-            ))}
-            <div style={{marginTop:12,padding:"11px 13px",background:"#0d0d0d",borderRadius:11,border:"1.5px solid #ccff0025"}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                <span style={{fontSize:12,color:"#9CA3AF"}}>合計</span>
-                <div style={{display:"flex",gap:10}}>
-                  <span style={{fontSize:16,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#CCFF00",letterSpacing:1}}>{p.breakfast.total.kcal}kcal</span>
-                  <span style={{fontSize:16,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#FF9500",letterSpacing:1}}>{p.breakfast.total.prot}g蛋白</span>
-                </div>
-              </div>
-              <div style={{fontSize:11,color:"#6B7280",borderLeft:"2px solid #CCFF00",paddingLeft:9,marginTop:8}}>
-                💡 {p.breakfast.tip}
-              </div>
+
+      {/* Photo area */}
+      <div onClick={()=>fileRef.current?.click()}
+        style={{width:"100%",aspectRatio:"4/3",borderRadius:14,overflow:"hidden",background:"#0a0a0a",border:"2px solid #ccff0030",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",marginBottom:14,position:"relative"}}>
+        {photoUrl
+          ? <img src={photoUrl} alt="食物照片" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+          : <div style={{textAlign:"center",padding:20}}>
+              <div style={{fontSize:38,marginBottom:8}}>📸</div>
+              <div style={{fontSize:13,color:"#CCFF00",fontWeight:700,marginBottom:4}}>點擊拍照或選擇相片</div>
+              <div style={{fontSize:11,color:"#4B5563"}}>讓大衛教練幫你看這餐的營養比例</div>
             </div>
-          </div>
-        )}
+        }
+        <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleFile} style={{display:"none"}}/>
       </div>
-    </div>
+
+      {/* User data context */}
+      {res && (
+        <div style={{background:"#111",borderRadius:11,padding:"10px 13px",marginBottom:14,border:"1px solid #ccff0020"}}>
+          <div style={{fontSize:10,color:"#4B5563",marginBottom:6,letterSpacing:1}}>將一併傳給教練的你的數據</div>
+          <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
+            {[["TDEE",res.tdee+"kcal","#CCFF00"],["目標",res.goalLabel,"#FF9500"],["蛋白質",res.prot+"g/日","#38BDF8"]].map(([l,v,c])=>(
+              <div key={l}><div style={{fontSize:9,color:"#4B5563"}}>{l}</div><div style={{fontSize:13,fontWeight:800,color:c}}>{v}</div></div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {phase==="idle" ? (
+        <button onClick={()=>fileRef.current?.click()} className="rh gb tap"
+          style={{width:"100%",padding:15,background:"linear-gradient(135deg,#38BDF8,#0ea5e9)",border:"none",borderRadius:13,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000"}}>
+          📷 開啟相機拍照
+        </button>
+      ) : (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+          <button onClick={()=>{setPhotoUrl(null);setPhase("idle");if(fileRef.current)fileRef.current.value="";}} className="tap"
+            style={{padding:14,borderRadius:13,border:"1.5px solid #ccff0030",background:"transparent",color:"#CCFF00",cursor:"pointer",fontSize:13,fontWeight:700}}>
+            重新拍攝
+          </button>
+          <button ref={ref} onClick={handleSend} className="rh gb tap"
+            style={{padding:14,background:"linear-gradient(135deg,#38BDF8,#0ea5e9)",border:"none",borderRadius:13,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>
+            💬 傳送給大衛教練
+          </button>
+        </div>
+      )}
+      <div style={{textAlign:"center",marginTop:12,fontSize:11,color:"#374151"}}>教練將於 24 小時內透過 LINE 回覆你</div>
+    </Modal>
   );
 }
 
-/* ── Days 2-7 Locked Preview ── */
-function LockedDays({onNeedVip}){
-  return(
+/* Goal Selector */
+function GoalSelector({goal, setGoal}) {
+  return (
     <div style={{marginBottom:14}}>
-      <div style={{fontSize:12,color:"#9CA3AF",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
-        <span style={{flex:1,height:1,background:"linear-gradient(90deg,#ccff0020,transparent)"}}/>
-        <span style={{fontSize:11,color:"#4B5563",whiteSpace:"nowrap"}}>以下需要 VIP 解鎖</span>
-        <span style={{flex:1,height:1,background:"linear-gradient(90deg,transparent,#ccff0020)"}}/>
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-        {DAYS_LOCKED.map((d,i)=>(
-          <button key={i} onClick={()=>onNeedVip(`第 ${d.day} 天完整計畫`)} className="tap"
-            style={{background:"#0d0d0d",border:"1px solid #1f1f1f",borderRadius:13,padding:"13px 12px",cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden"}}>
-            {/* blur content */}
-            <div style={{filter:"blur(3px)",pointerEvents:"none"}}>
-              <div style={{fontSize:11,fontWeight:800,color:"#6B7280",marginBottom:4}}>第 {d.day} 天</div>
-              <div style={{fontSize:10,color:"#374151",marginBottom:2}}>🏋️ {d.workout}</div>
-              <div style={{fontSize:10,color:"#374151"}}>🍳 {d.breakfast}</div>
-            </div>
-            {/* lock icon overlay */}
-            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:4,background:"rgba(8,8,8,.7)"}}>
-              <div style={{fontSize:20}}>🔒</div>
-              <div style={{fontSize:9,color:"#FFD700",fontWeight:700}}>VIP 解鎖</div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Full 7-Day VIP Plan ── */
-function FullWeekPlan(){
-  const[open,setOpen]=useState(null);
-  return(
-    <div className="card" style={{border:"1.5px solid rgba(255,215,0,.2)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-        <div style={{fontSize:16}}>📋</div>
-        <div style={{fontSize:14,fontWeight:900,color:"#CCFF00"}}>7 天完整飲食計畫</div>
-        <div className="bp vs" style={{marginLeft:"auto",fontSize:11,fontWeight:900,padding:"3px 10px",background:"transparent",border:"1px solid rgba(255,215,0,.4)",borderRadius:20}}>👑 VIP</div>
-      </div>
-      {FULL_WEEK.map((d,i)=>(
-        <div key={i} onClick={()=>setOpen(open===i?null:i)} className="tap"
-          style={{background:open===i?"#111":"transparent",borderRadius:12,padding:"11px 13px",marginBottom:7,border:`1px solid ${open===i?"#ccff0022":"#1a1a1a"}`,cursor:"pointer",transition:"all .2s"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontSize:13,fontWeight:800,color:"#E5E7EB"}}>第 {d.day} 天</span>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <span style={{fontSize:11,color:"#CCFF00",fontWeight:700}}>{d.kcal}kcal</span>
-              <span style={{fontSize:11,color:"#FF9500",fontWeight:700}}>{d.prot}g</span>
-              <span style={{fontSize:12,color:"#CCFF00",transition:"transform .2s",display:"inline-block",transform:open===i?"rotate(180deg)":"none"}}>▾</span>
-            </div>
-          </div>
-          {open===i&&(
-            <div className="au" style={{marginTop:10,paddingTop:10,borderTop:"1px solid #1f1f1f"}}>
-              {d.meals.map((m,j)=>(
-                <div key={j} style={{display:"flex",gap:8,padding:"4px 0",fontSize:12,color:"#9CA3AF",lineHeight:1.7}}>
-                  <span style={{color:"#CCFF00",flexShrink:0}}>▸</span>{m}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-      <div style={{marginTop:10,padding:"11px 13px",background:"#111",borderRadius:10,borderLeft:"3px solid rgba(255,215,0,.5)",fontSize:11,color:"#9CA3AF",lineHeight:1.75}}>
-        👑 需要大衛教練根據你的數據客製化菜單？
-        <button onClick={lineConsult} style={{color:"#FFD700",background:"none",border:"none",cursor:"pointer",fontWeight:700,fontSize:11,marginLeft:4,textDecoration:"underline"}}>LINE 聯繫</button>
+      <div style={{fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:12}}>🎯 選擇目標</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        {GOALS.map(g => {
+          const a = goal===g.id;
+          return (
+            <button key={g.id} onClick={()=>setGoal(g.id)} className="tap"
+              style={{padding:"13px 5px",borderRadius:14,border:`1.5px solid ${a?g.color:g.color+"1a"}`,cursor:"pointer",textAlign:"center",background:a?`${g.color}0e`:"transparent",transition:"all .22s",boxShadow:a?`0 0 0 2px ${g.color}44,0 0 22px ${g.color}22`:"none"}}>
+              <div style={{fontSize:22,marginBottom:4}}>{g.icon}</div>
+              <div style={{fontSize:13,fontWeight:900,color:a?g.color:"#6B7280"}}>{g.label}</div>
+              <div style={{fontSize:9,color:a?g.color+"bb":"#374151",marginTop:2,lineHeight:1.4}}>{g.sub}</div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 /* Workout Plan */
-function WorkoutPlan({goal}){
-  const plan=WORKOUTS[goal]||WORKOUTS.muscle;
-  const[exp,setExp]=useState(null);
-  const gi=GOALS.find(g=>g.id===goal)||GOALS[0];
-  return(
+function WorkoutPlan({goal}) {
+  const plan = WORKOUTS[goal]||WORKOUTS.muscle;
+  const gi   = GOALS.find(g=>g.id===goal)||GOALS[0];
+  const [exp,setExp] = useState(null);
+  return (
     <div style={{background:"#0c0c0a",borderRadius:16,padding:18,border:`1.5px solid ${gi.color}20`,marginBottom:14}}>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-        <div style={{width:36,height:36,background:`${gi.color}12`,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,border:`1px solid ${gi.color}22`,flexShrink:0}}>{gi.icon}</div>
+        <div style={{width:35,height:35,background:`${gi.color}12`,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,border:`1px solid ${gi.color}22`,flexShrink:0}}>{gi.icon}</div>
         <div style={{fontSize:14,fontWeight:900,color:gi.color}}>{plan.title}</div>
       </div>
       <div style={{height:1,background:`linear-gradient(90deg,${gi.color}30,transparent)`,marginBottom:12}}/>
-      {plan.exercises.map((ex,i)=>(
+      {plan.exercises.map((ex,i) => (
         <div key={i} onClick={()=>setExp(exp===i?null:i)} className="tap"
-          style={{padding:"10px 12px",background:exp===i?"#111":"transparent",borderRadius:11,marginBottom:5,border:`1px solid ${exp===i?gi.color+"25":"#1a1a1a"}`,cursor:"pointer",transition:"all .2s"}}>
+          style={{padding:"10px 11px",background:exp===i?"#111":"transparent",borderRadius:11,marginBottom:5,border:`1px solid ${exp===i?gi.color+"25":"#1a1a1a"}`,cursor:"pointer",transition:"all .18s"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div>
               <div style={{fontSize:13,fontWeight:800,color:"#E5E7EB"}}>{ex.name}</div>
-              <div style={{fontSize:11,color:"#6B7280",marginTop:2}}><span style={{color:gi.color,fontWeight:700}}>{ex.sets}組</span> × {ex.reps}</div>
+              <div style={{fontSize:11,color:"#6B7280",marginTop:1}}><span style={{color:gi.color,fontWeight:700}}>{ex.sets}組</span> × {ex.reps}</div>
             </div>
             <span style={{fontSize:12,color:gi.color,transition:"transform .2s",display:"inline-block",transform:exp===i?"rotate(180deg)":"none"}}>▾</span>
           </div>
-          {exp===i&&<div className="au" style={{marginTop:9,padding:"9px 11px",background:"#0a0a0a",borderRadius:9,borderLeft:`2px solid ${gi.color}`,fontSize:12,color:"#9CA3AF",lineHeight:1.75}}><span style={{color:gi.color,fontWeight:800}}>💡 </span>{ex.tip}</div>}
+          {exp===i && <div className="au" style={{marginTop:8,padding:"8px 10px",background:"#0a0a0a",borderRadius:9,borderLeft:`2px solid ${gi.color}`,fontSize:12,color:"#9CA3AF",lineHeight:1.75}}>💡 {ex.tip}</div>}
         </div>
       ))}
-      <div style={{marginTop:9,padding:"10px 12px",background:"#111",borderRadius:10,borderLeft:"3px solid #CCFF00",fontSize:12,color:"#9CA3AF",lineHeight:1.75}}>⚡ {plan.note}</div>
+      <div style={{marginTop:8,padding:"10px 11px",background:"#111",borderRadius:10,borderLeft:"3px solid #CCFF00",fontSize:12,color:"#9CA3AF",lineHeight:1.75}}>⚡ {plan.note}</div>
     </div>
   );
 }
 
-/* NLP Food */
-function NLPFood({goal,isVip,onNeedVip}){
-  const[text,setText]=useState("");
-  const[result,setResult]=useState(null);
-  const[loading,setLoading]=useState(false);
-  const[history,setHistory]=useState([]);
-  const gi=GOALS.find(g=>g.id===goal)||GOALS[0];
-  const ex=["我喝了 450ml 的無糖豆漿","我吃了一個排骨便當","吃了滷雞腿加白飯","中午火鍋，牛肉片 150g"];
-  const calc=()=>{
-    if(!text.trim())return;setLoading(true);
-    setTimeout(()=>{
-      const r=parseNLP(text);
-      if(!r.matched.length){setResult({err:"未找到對應食物。試試：「吃了雞胸肉100g」或「喝了無糖豆漿500ml」"});}
-      else{setResult(r);setHistory(h=>[{text,kcal:r.totalKcal,prot:r.totalProt},...h].slice(0,5));}
-      setLoading(false);
-    },550);
-  };
-  return(
-    <div className="card" style={{border:`1.5px solid ${gi.color}20`}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:13}}>
-        <div style={{width:36,height:36,background:`${gi.color}12`,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,border:`1px solid ${gi.color}22`,flexShrink:0}}>🥘</div>
-        <div><div style={{fontSize:14,fontWeight:900,color:gi.color}}>自然語言飲食換算</div><div style={{fontSize:10,color:"#6B7280"}}>說出你吃了什麼，AI 自動計算</div></div>
+/* Streak Bar */
+function StreakBar({streak, cnt}) {
+  const fire = streak>=7;
+  const pct  = Math.min((streak/30)*100,100);
+  return (
+    <div style={{background:"#0c0c0c",borderRadius:16,padding:17,border:"1px solid #ccff0014",marginBottom:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:11}}>
+        <div style={{fontSize:13,fontWeight:800,color:fire?"#ffdd00":"#CCFF00"}}>{fire?"🔥":"⚡"} {streak} 天連續逆襲</div>
+        <div style={{fontSize:11,color:"#4B5563",fontFamily:"'JetBrains Mono',monospace"}}>{cnt}/30</div>
       </div>
-      <textarea value={text} onChange={e=>setText(e.target.value)} placeholder={"輸入你吃了什麼，例如：\n「我喝了 450ml 無糖豆漿」\n「吃了滷雞腿加白飯」"}
-        style={{width:"100%",background:"#141414",border:"1px solid #2a2a2a",borderRadius:12,color:"#D1D5DB",padding:"12px 13px",fontSize:13,fontFamily:"inherit",lineHeight:1.75,height:86,marginBottom:10}}/>
-      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:11}}>
-        {ex.slice(0,3).map(e=>(
-          <button key={e} onClick={()=>setText(e)} className="tap"
-            style={{padding:"5px 9px",background:"#141414",border:"1px solid #222",borderRadius:20,fontSize:10,color:"#6B7280",cursor:"pointer"}}>
-            {e.slice(0,13)}…
-          </button>
-        ))}
+      <div style={{height:7,background:"#1a1a1a",borderRadius:4,overflow:"hidden"}}>
+        <div className="bf" style={{"--w":`${pct}%`,height:"100%",borderRadius:4,background:fire?"linear-gradient(90deg,#ff5500,#ffdd00,#ff5500)":"linear-gradient(90deg,#CCFF00,#aaee00)"}}/>
       </div>
-      <button onClick={calc} disabled={loading||!text.trim()} className={`rh tap ${!loading&&text.trim()?"gg":""}`}
-        style={{width:"100%",padding:13,background:loading||!text.trim()?"#1a1a1a":"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:11,cursor:loading||!text.trim()?"default":"pointer",fontSize:14,fontWeight:900,color:loading||!text.trim()?"#333":"#000",transition:"all .2s"}}>
-        {loading?"⚡ AI 分析中…":"🔍 計算營養"}
-      </button>
-      {result&&(
-        <div className="au" style={{marginTop:12}}>
-          {result.err?(
-            <div style={{background:"#1a0808",borderRadius:11,padding:"11px 13px",border:"1px solid #FF444425",fontSize:12,color:"#FF4444"}}>{result.err}</div>
-          ):(
-            <div style={{background:"#0d0d0d",borderRadius:12,padding:"13px 13px",border:`1px solid ${gi.color}20`}}>
-              <div style={{fontSize:12,fontWeight:900,color:gi.color,marginBottom:10}}>✅ 辨識結果</div>
-              {result.matched.map((f,i)=>(
-                <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #1a1a1a",fontSize:12}}>
-                  <span style={{color:"#D1D5DB"}}>{f.name}{f.qty>1?` ×${f.qty}`:""}</span>
-                  <div style={{display:"flex",gap:6}}><span style={{color:"#CCFF00",fontWeight:700}}>{f.kcal}kcal</span><span style={{color:"#FF9500",fontWeight:700}}>{f.prot}g蛋白</span></div>
-                </div>
-              ))}
-              <div style={{display:"flex",justifyContent:"space-between",marginTop:10,paddingTop:10,borderTop:"1.5px solid #2a2a2a"}}>
-                <span style={{fontSize:13,fontWeight:800,color:"#D1D5DB"}}>合計</span>
-                <div style={{display:"flex",gap:10}}>
-                  <span style={{fontSize:18,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#CCFF00",letterSpacing:1}}>{result.totalKcal} kcal</span>
-                  <span style={{fontSize:18,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#FF9500",letterSpacing:1}}>{result.totalProt}g</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      {history.length>0&&(
-        <div style={{marginTop:12}}>
-          <div style={{fontSize:10,color:"#4B5563",letterSpacing:1.5,marginBottom:7}}>最近紀錄</div>
-          {history.map((h,i)=>(
-            <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#6B7280",padding:"5px 0",borderBottom:"1px solid #141414"}}>
-              <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:175}}>{h.text}</span>
-              <span style={{color:"#CCFF00",flexShrink:0,marginLeft:8}}>{h.kcal}kcal/{h.prot}g蛋白</span>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
 
-/* AI Chat */
-function AIChat({res,goal,isVip,onPhotoAudit}){
-  const[msgs,setMsgs]=useState([]);
-  const[inp,setInp]=useState("");
-  const[busy,setBusy]=useState(false);
-  const bot=useRef(null);
-  const gi=GOALS.find(g=>g.id===goal)||GOALS[0];
-  const QA=["我還差 300 大卡怎麼補？","訓練前吃什麼最好？","今天蛋白質不夠怎麼辦？","休息日要怎麼吃？","睡前補充什麼？","怎麼用外食達標？"];
-  const CTX={muscle:"你是大衛教練的增肌專家助手。強調：熱量盈餘300kcal、每公斤1.8g蛋白質、漸進超負荷。語氣積極有力。繁體中文，150字內，條列式。",cut:"你是大衛教練的減脂助手。強調：缺口400kcal、高蛋白保肌、飽足感。語氣務實支持。繁體中文，150字內。",keep:"你是大衛教練的維持助手。強調：TDEE平衡、動作品質。繁體中文，150字內。"};
-
-  useEffect(()=>{setMsgs([{from:"coach",text:`嗨！我是大衛教練的 AI 助手 💪\n目前模式：${gi.icon} ${gi.label}\n\n有任何飲食或訓練問題，直接問我！`}]);},[goal]);
-  useEffect(()=>{bot.current?.scrollIntoView({behavior:"smooth"});},[msgs,busy]);
-
-  const send=async q=>{
-    if(!q.trim()||busy)return;
-    setMsgs(m=>[...m,{from:"user",text:q}]);setInp("");setBusy(true);
-    const sys=CTX[goal]||CTX.muscle;
-    const uctx=res?`用戶：TDEE=${res.tdee}，目標=${res.goalTarget}kcal，蛋白質=${res.prot}g/日`:"";
-    try{
-      const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:`${sys}${uctx?"\n"+uctx:""}`,messages:[{role:"user",content:q}]})});
-      const d=await r.json();
-      setMsgs(m=>[...m,{from:"coach",text:d.content?.map(c=>c.text||"").join("")||"暫時無法回覆，請稍後再試。"}]);
-    }catch{setMsgs(m=>[...m,{from:"coach",text:"網路連線問題，請稍後再試 💪"}]);}
-    setBusy(false);
-  };
-
-  return(
-    <div style={{background:"#0a0a0a",borderRadius:16,border:`1.5px solid ${gi.color}20`,overflow:"hidden",marginBottom:14}}>
-      <div style={{padding:"12px 15px",borderBottom:"1px solid #1a1a1a",display:"flex",alignItems:"center",gap:10}}>
-        <div style={{width:33,height:33,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>🤖</div>
-        <div><div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>AI 教練決策助手</div><div style={{fontSize:10,color:"#4B5563"}}>{gi.icon} {gi.label}模式 · Claude AI</div></div>
-        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5}}>
-          <div style={{width:7,height:7,borderRadius:"50%",background:"#CCFF00",animation:"glowG 2s ease-in-out infinite"}}/>
-          <span style={{fontSize:10,color:"#CCFF00"}}>線上</span>
+/* David Persona */
+function DavidPersona({onTired}) {
+  const [idx,setIdx] = useState(()=>Math.floor(Math.random()*DAVID_RANTS.length));
+  const r = DAVID_RANTS[idx];
+  const next = () => setIdx(i=>(i+1)%DAVID_RANTS.length);
+  return (
+    <div style={{background:"linear-gradient(135deg,#0e0e0a,#121210)",border:"1.5px solid #ccff0028",borderRadius:18,padding:"17px 16px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:-20,right:-20,width:90,height:90,borderRadius:"50%",background:"radial-gradient(circle,#ccff000c,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:13}}>
+        <div className="pbob" style={{width:40,height:40,background:"linear-gradient(135deg,#CCFF00,#aaee00)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,flexShrink:0,boxShadow:"0 0 18px rgba(204,255,0,.35)"}}>💬</div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:11,color:"#CCFF00",letterSpacing:2.5,fontWeight:800}}>大衛教練碎碎念</div>
+          <div style={{fontSize:9,color:"#4B5563",marginTop:1}}>{new Date().toLocaleDateString("zh-TW",{month:"long",day:"numeric"})}</div>
         </div>
+        <button onClick={next} className="tap" style={{width:28,height:28,borderRadius:"50%",border:"1px solid #ccff0030",background:"transparent",color:"#CCFF00",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>↻</button>
       </div>
-      <div style={{height:220,overflowY:"auto",padding:"12px 13px 6px",display:"flex",flexDirection:"column",gap:10}}>
-        {msgs.map((m,i)=>(
-          <div key={i} className="cb" style={{display:"flex",justifyContent:m.from==="user"?"flex-end":"flex-start"}}>
-            {m.from==="coach"&&<div style={{width:27,height:27,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginRight:8,alignSelf:"flex-end"}}>🤖</div>}
-            <div style={{maxWidth:"82%",padding:"10px 13px",borderRadius:m.from==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",background:m.from==="user"?"#CCFF00":"#161616",color:m.from==="user"?"#000":"#D1D5DB",fontSize:12,lineHeight:1.85,fontWeight:m.from==="user"?700:400,whiteSpace:"pre-wrap",border:m.from==="coach"?"1px solid #ccff0016":"none"}}>{m.text}</div>
-          </div>
-        ))}
-        {busy&&(
-          <div className="cb" style={{display:"flex",alignItems:"flex-end",gap:8}}>
-            <div style={{width:27,height:27,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
-            <div style={{background:"#161616",borderRadius:"14px 14px 14px 4px",padding:"10px 14px",border:"1px solid #ccff0016",display:"flex",gap:4}}>
-              {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"#CCFF00",animation:`dotP 1.2s ease-in-out ${i*.2}s infinite`}}/>)}
-            </div>
-          </div>
-        )}
-        <div ref={bot}/>
+      <div className="ai" key={idx}>
+        <div style={{fontSize:24,marginBottom:7}}>{r.mood}</div>
+        <div style={{fontSize:14,fontWeight:800,color:"#F9FAFB",lineHeight:1.8,marginBottom:5}}>{r.text}</div>
+        <div style={{fontSize:11,color:"#6B7280",borderLeft:"2px solid #CCFF00",paddingLeft:9}}>{r.sub}</div>
       </div>
-      <div style={{padding:"7px 13px",borderTop:"1px solid #1a1a1a",display:"flex",gap:5,flexWrap:"wrap"}}>
-        {QA.slice(0,4).map(q=>(
-          <button key={q} onClick={()=>send(q)} className="tap"
-            style={{padding:"5px 10px",background:"#141414",border:"1px solid #ccff0022",borderRadius:20,cursor:"pointer",fontSize:10,color:"#CCFF00",fontWeight:700}}>
-            {q}
-          </button>
-        ))}
-      </div>
-      <div style={{padding:"10px 13px",borderTop:"1px solid #1a1a1a",display:"flex",gap:7}}>
-        <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(inp);}}}
-          placeholder="問大衛教練任何問題…"
-          style={{flex:1,background:"#141414",border:"1px solid #2a2a2a",borderRadius:10,color:"#D1D5DB",padding:"10px 12px",fontSize:12,fontFamily:"inherit"}}/>
-        <button onClick={()=>send(inp)} disabled={busy||!inp.trim()} className="tap"
-          style={{padding:"10px 14px",background:busy||!inp.trim()?"#1a1a1a":"#CCFF00",border:"none",borderRadius:10,cursor:busy||!inp.trim()?"default":"pointer",fontSize:13,fontWeight:900,color:busy||!inp.trim()?"#333":"#000",transition:"all .2s"}}>
-          {busy?"…":"送出"}
+      <div style={{display:"flex",gap:8,marginTop:14}}>
+        <button onClick={onTired} className="tap"
+          style={{flex:1,padding:"11px 0",borderRadius:11,border:"1.5px solid #ccff0035",background:"transparent",color:"#CCFF00",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+          <span>😮‍💨</span><span>我很累 / 心靈補給</span>
         </button>
-      </div>
-      {/* Photo Audit Button */}
-      <div style={{padding:"0 13px 12px"}}>
-        <button onClick={onPhotoAudit} className={`rh tap ${isVip?"gb":""}`}
-          style={{width:"100%",padding:"12px 0",borderRadius:12,border:`1.5px solid ${isVip?"#38BDF840":"#1f1f1f"}`,background:isVip?"#38BDF808":"transparent",cursor:"pointer",fontSize:13,fontWeight:700,color:isVip?"#38BDF8":"#4B5563",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s"}}>
-          <span style={{fontSize:17}}>📷</span>
-          <span>拍照審核</span>
-          {!isVip&&<span style={{fontSize:10,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontWeight:900,marginLeft:2}}>🔐 VIP</span>}
-          {isVip&&<span style={{fontSize:10,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontWeight:900,marginLeft:2}}>送教練真人審核</span>}
+        <button onClick={()=>window.open(LINKTREE,"_blank")} className="tap"
+          style={{flexShrink:0,padding:"11px 14px",borderRadius:11,border:"none",background:"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",fontSize:12,fontWeight:900,cursor:"pointer"}}>
+          📅 預約
         </button>
       </div>
     </div>
   );
 }
 
-function MonthlyReport({logs,targetProt,onNeedVip}){
-  if(logs.length<3)return null;
-  const avg=k=>Math.round(logs.reduce((s,l)=>s+l[k],0)/logs.length);
-  const hit=targetProt?logs.filter(l=>l.prot>=targetProt).length:0;
-  const rate=targetProt?Math.round((hit/logs.length)*100):null;
-  const rc=rate===null?"#6B7280":rate>=80?"#CCFF00":rate>=50?"#FF9500":"#FF4444";
-  const grade=!rate?{i:"📊",t:"持續記錄中…"}:rate>=80?{i:"🏆",t:`達標率 ${rate}%！習慣已養成！`}:rate>=50?{i:"📈",t:`達標率 ${rate}%，先確保早餐蛋白質到位。`}:{i:"⚠️",t:`達標率 ${rate}%，意識到問題就贏了一半。`};
-  return(
-    <div style={{background:"#0a0a0a",borderRadius:14,padding:17,marginTop:14,border:"1.5px solid #ccff0016"}}>
-      <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:13}}>📅 月度評估（{logs.length}天）</div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
-        {[["均TDEE",avg("tdee"),"kcal","#38BDF8"],["均蛋白質",avg("prot"),"g","#FF9500"],["達標率",rate!==null?`${rate}%`:"—","",rc]].map(([l,v,u,c])=>(
-          <div key={l} style={{background:"#111",borderRadius:10,padding:"10px 9px",border:`1px solid ${c}16`,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}}/>
-            <div style={{fontSize:9,color:"#4B5563",letterSpacing:1.2,marginBottom:5}}>{l}</div>
-            <div style={{fontSize:21,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:c,letterSpacing:1}}>{v}</div>
-            <div style={{fontSize:9,color:"#374151",marginTop:2}}>{u}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{background:"#111",borderRadius:10,padding:"11px 13px",borderLeft:"3px solid #CCFF00",marginBottom:12}}>
-        <span style={{fontSize:13,marginRight:7}}>{grade.i}</span>
-        <span style={{fontSize:12,color:"#D1D5DB",lineHeight:1.85}}>{grade.t}</span>
-      </div>
-      <button onClick={()=>onNeedVip("30 天數據趨勢圖")} className="tap"
-        style={{width:"100%",padding:"12px 0",background:"linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,136,0,.06))",border:"1px solid rgba(255,215,0,.28)",borderRadius:11,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-        <span style={{fontSize:14}}>📈</span>
-        <span style={{fontSize:13,fontWeight:800,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>解鎖 30 天趨勢圖</span>
-        <span style={{fontSize:10,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>🔐 VIP</span>
-      </button>
-    </div>
-  );
-}
+/* ════════════════════════════════════
+   TAB: CALC
+════════════════════════════════════ */
+function CalcTab({appState, setAppState, onToast, onNeedVip}) {
+  const {gender,weight,height,age,act,goal,neaChecked,logs,isVip} = appState;
 
-/* ═══════════════════════════════════
-   MAIN APP
-═══════════════════════════════════ */
-function App(){
-  const[tab,setTab]=useState("calc");
-  const[gender,setGender]=useState("male");
-  const[weight,setWeight]=useState("");
-  const[height,setHeight]=useState("");
-  const[age,setAge]=useState("");
-  const[act,setAct]=useState(1.55);
-  const[goal,setGoal]=useState("muscle");
-  const[res,setRes]=useState(null);
-  const[animKey,setAnimKey]=useState(0);
-  const[showShare,setShowShare]=useState(false);
-  const[logs,setLogs]=useState([]);
-  const[streak,setStreak]=useState(0);
-  const[saved,setSaved]=useState(false);
-  const[isVip,setIsVip]=useState(false);
-  const[toast,setToast]=useState(null);
-  const[premiumModal,setPremiumModal]=useState(null);
-  const[unlockOpen,setUnlockOpen]=useState(false);
-  const[vipActivated,setVipActivated]=useState(false);
-  const[tiredOpen,setTiredOpen]=useState(false);
-  const[photoAuditOpen,setPhotoAuditOpen]=useState(false);
-  const[calcRef,calcFire]=useRipple();
-  const[saveRef,saveFire]=useRipple();
+  const setGender  = v => setAppState(s=>({...s,gender:v}));
+  const setWeight  = v => setAppState(s=>({...s,weight:v}));
+  const setHeight  = v => setAppState(s=>({...s,height:v}));
+  const setAge     = v => setAppState(s=>({...s,age:v}));
+  const setAct     = v => setAppState(s=>({...s,act:v}));
+  const setGoal    = v => setAppState(s=>({...s,goal:v}));
+  const toggleNea  = id => setAppState(s=>{
+    const n = s.neaChecked.includes(id) ? s.neaChecked.filter(x=>x!==id) : [...s.neaChecked,id];
+    return {...s,neaChecked:n};
+  });
 
-  useEffect(()=>{
-    const d=loadD();
-    setLogs(d.logs||[]);setStreak(calcStreak(d.logs||[]));
-    if(d.savedGoal)setGoal(d.savedGoal);
-    if(d.isVip)setIsVip(true);
-    if(d.savedForm){const f=d.savedForm;if(f.gender)setGender(f.gender);if(f.weight)setWeight(String(f.weight));if(f.height)setHeight(String(f.height));if(f.age)setAge(String(f.age));if(f.act)setAct(f.act);}
-  },[]);
+  const tdee = calcTDEE(gender, weight, height, age, act, neaChecked);
+  const gc   = tdee ? calcGoalTarget(tdee, goal) : null;
+  const prot = calcProt(weight, goal);
+  const bmi  = (weight&&height) ? (parseFloat(weight)/((parseFloat(height)/100)**2)).toFixed(1) : null;
+  const streak = calcStreak(logs);
 
-  useEffect(()=>{const d=loadD();saveD({...d,savedGoal:goal});},[goal]);
+  const [res, setRes]       = useState(null);
+  const [animKey, setAnimKey] = useState(0);
+  const [saved, setSaved]   = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [calcRef,calcFire]  = useRipple();
+  const [saveRef,saveFire]  = useRipple();
 
-  const handleNeedVip=feature=>setPremiumModal(feature);
-
-  const handleUnlock=()=>{
-    setIsVip(true);setUnlockOpen(false);setPremiumModal(null);setVipActivated(true);
-    const d=loadD();saveD({...d,isVip:true});
-  };
-
-  const handlePhotoAudit=()=>{
-    if(isVip){setPhotoAuditOpen(true);}
-    else{handleNeedVip("AI 拍照送教練審核");}
-  };
-
-  const getGoalCalc=(tdee,g)=>{
-    if(g==="muscle")return{target:tdee+300,label:"增肌目標",color:"#CCFF00"};
-    if(g==="cut")return{target:Math.max(tdee-400,1200),label:"減脂目標",color:"#FF9500"};
-    return{target:tdee,label:"維持目標",color:"#38BDF8"};
-  };
-
-  const handleCalc=e=>{
+  const handleCalc = e => {
     calcFire(e);
-    const w=parseFloat(weight),h=parseFloat(height),a=parseInt(age);
-    if(!w||!h||!a||w<20||h<100||a<10){setToast("請確認體重（≥20kg）、身高（≥100cm）、年齡（≥10）！");return;}
-    const bmr=gender==="male"?88.362+13.397*w+4.799*h-5.677*a:447.593+9.247*w+3.098*h-4.330*a;
-    const tdee=Math.round(bmr*act);
-    const gc=getGoalCalc(tdee,goal);
-    const prot=Math.round(w*(goal==="cut"?1.6:1.8));
-    const COMM={male:{low:"兄弟，代謝偏低代表肌肉量不足。每公斤補 1.6g 蛋白質，搭配重訓，三個月後你會認不出自己。",medium:"基礎到位！每天盈餘 300kcal，漸進超負荷訓練，你的逆襲才剛啟動。",high:"強者！代謝旺盛是天賦。每公斤 2g 蛋白質，週 4 練，六個月後你就是傳說。"},female:{low:"姐妹，別怕吃！代謝低先喚醒肌肉，從優質蛋白質開始。",medium:"很棒的基礎！每天多 250kcal，堅持 90 天，體態讓人驚訝。",high:"運動員代謝！別讓熱量不足阻礙你，擁有讓人羨慕的體態。"}};
-    const lvl=tdee<1800?"low":tdee<2500?"medium":"high";
-    setRes({tdee,goalTarget:gc.target,goalLabel:gc.label,goalColor:gc.color,bmi:(w/((h/100)**2)).toFixed(1),prot,weight:w,age:a,comment:COMM[gender][lvl]});
-    setAnimKey(k=>k+1);setSaved(false);setShowShare(false);
-    const d=loadD();saveD({...d,savedForm:{gender,weight:w,height:h,age:a,act},savedGoal:goal});
+    if (!tdee) { onToast("請確認體重（≥20kg）、身高（≥100cm）、年齡（≥10）！"); return; }
+    const neaBonus = neaChecked.length * 80;
+    setRes({tdee, goalTarget:gc.target, goalLabel:gc.label, goalColor:gc.color, goalDelta:gc.delta, prot, bmi, weight:parseFloat(weight), neaBonus});
+    setAnimKey(k=>k+1); setSaved(false); setShowShare(false);
   };
 
-  const handleSave=e=>{
-    saveFire(e);if(!res)return;
-    const today=isoToday();
-    const prev=loadD().logs.filter(l=>l.date!==today);
-    const next=[{date:today,label:isoLbl(today),tdee:res.tdee,goal:res.goalTarget,prot:res.prot},...prev].slice(0,MAX_DAYS);
-    const st=calcStreak(next);
-    const d=loadD();saveD({...d,logs:next,streak:st,lastDate:today});
-    setLogs(next);setStreak(st);setSaved(true);
-    setToast(st>=7?`🔥 第 ${st} 天！黃金火焰燃燒——你現在是前 5%！`:`✅ 戰果回報！大衛教練提醒：水分也要補足 💧`);
+  const handleSave = e => {
+    saveFire(e);
+    if (!res) return;
+    const today = isoToday();
+    const prev  = (appState.logs||[]).filter(l=>l.date!==today);
+    const next  = [{date:today,label:fmtDate(today),tdee:res.tdee,goal:res.goalTarget,prot:res.prot},...prev].slice(0,30);
+    const newStreak = calcStreak(next);
+    setAppState(s=>({...s,logs:next}));
+    setSaved(true);
+    onToast(newStreak>=7 ? `🔥 第 ${newStreak} 天！你現在是前 5%！` : `✅ 戰果回報！教練說：水分也要補足 💧`);
   };
 
-  const handleClear=()=>{const d=loadD();saveD({...d,logs:[],streak:0,lastDate:""});setLogs([]);setStreak(0);setSaved(false);setToast("重新開機！新的篇章從今天開始 💪");};
+  const COMMENT = {
+    male:{low:"兄弟，代謝偏低代表肌肉量不足。每公斤補 1.8g 蛋白質，搭配重訓，三個月後你會認不出自己。",medium:"基礎到位！熱量盈餘 300kcal + 漸進超負荷，你的逆襲才剛啟動。",high:"強者！代謝旺盛是天賦。每公斤 2g 蛋白質，週 4 練，六個月後你就是傳說。"},
+    female:{low:"姐妹，別怕吃！代謝低先喚醒肌肉，從優質蛋白質開始，找對方法才是關鍵。",medium:"很棒的基礎！每天多 250kcal，堅持 90 天，體態會讓人驚訝。",high:"運動員代謝！別讓熱量不足阻礙你，你完全可以擁有讓人羨慕的體態。"},
+  };
+  const tdeeLevel = tdee ? (tdee<1800?"low":tdee<2500?"medium":"high") : "medium";
+  const gi = GOALS.find(g=>g.id===goal)||GOALS[0];
+  const lbl = {fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:10,display:"block"};
 
-  const isFlame=streak>=7;
-  const gi=GOALS.find(g=>g.id===goal)||GOALS[0];
-  const lbl={fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:10,display:"block"};
+  return (
+    <div>
+      <DavidPersona onTired={()=>setAppState(s=>({...s,_tired:true}))}/>
+      {streak>0 && <StreakBar streak={streak} cnt={(appState.logs||[]).length}/>}
 
-  return(
-    <div style={{background:"linear-gradient(160deg,#0e0e0a 0%,#080808 42%,#0c0c08 72%,#080808 100%)",minHeight:"100vh",position:"relative",zIndex:1}}>
-      {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
-      {tiredOpen&&<TiredModal onClose={()=>setTiredOpen(false)}/>}
-      {premiumModal&&<PremiumModal feature={premiumModal} onClose={()=>setPremiumModal(null)} onShowUnlock={()=>setUnlockOpen(true)}/>}
-      {unlockOpen&&<VIPUnlockModal onUnlock={handleUnlock} onClose={()=>setUnlockOpen(false)}/>}
-      {vipActivated&&<VIPActivated onClose={()=>setVipActivated(false)}/>}
-      {photoAuditOpen&&<PhotoAuditModal res={res} onClose={()=>setPhotoAuditOpen(false)}/>}
+      {/* Goal */}
+      <div className="card"><GoalSelector goal={goal} setGoal={setGoal}/></div>
 
-      <div style={{maxWidth:480,margin:"0 auto"}}>
-
-        {/* ── HEADER ── */}
-        <div style={{background:"linear-gradient(180deg,#141410 0%,#0a0a08 100%)",borderBottom:"1px solid #ccff0010",padding:"18px 18px 14px"}}>
-          <div style={{display:"flex",alignItems:"center",gap:13,marginBottom:12}}>
-            <div style={{width:50,height:50,flexShrink:0,borderRadius:15,background:"linear-gradient(135deg,#CCFF00,#aaee00)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 0 30px rgba(204,255,0,.48)"}}>💪</div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:26,fontWeight:900,color:"#CCFF00",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:3,lineHeight:1}}>大衛教練</div>
-              <div style={{fontSize:10,color:"#4B5563",letterSpacing:2,marginTop:4}}>AI 增肌決策系統 · v6.1 · 2026</div>
-            </div>
-            <div style={{display:"flex",gap:7,alignItems:"center",flexShrink:0}}>
-              {isVip&&<div className="bp" style={{padding:"5px 11px",borderRadius:22,fontSize:10,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",color:"#000"}}>👑 VIP</div>}
-              {streak>0&&<div className="bp" style={{padding:"5px 11px",borderRadius:22,fontSize:11,fontWeight:800,background:isFlame?"linear-gradient(135deg,#ff5500,#ffdd00)":"#ccff0016",color:isFlame?"#000":"#CCFF00",border:`1px solid ${isFlame?"#ffaa00":"#ccff0028"}`}}>{isFlame?"🔥":"⚡"}{streak}天</div>}
-            </div>
-          </div>
-          {/* header actions */}
-          {!isVip&&(
-            <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>setUnlockOpen(true)} className="tap"
-                style={{flex:1,padding:"9px 0",borderRadius:11,border:"1.5px dashed rgba(255,215,0,.32)",background:"transparent",color:"#FFD700",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                🔐 輸入解鎖碼
-              </button>
-              <button onClick={lineConsult} className="rh tap"
-                style={{flex:1,padding:"9px 0",borderRadius:11,border:"none",background:"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",fontSize:12,fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                💬 LINE 教練 NT$199
-              </button>
-            </div>
-          )}
-          {isVip&&(
-            <div style={{display:"flex",alignItems:"center",gap:10,padding:"9px 13px",background:"linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,136,0,.05))",border:"1px solid rgba(255,215,0,.22)",borderRadius:11}}>
-              <span style={{fontSize:16}}>👑</span>
-              <div>
-                <div className="vs" style={{fontSize:12,fontWeight:900,letterSpacing:1}}>VIP 功能全解鎖</div>
-                <div style={{fontSize:10,color:"#6B7280",marginTop:1}}>7天計畫・AI拍照・私訊優先</div>
-              </div>
-              <button onClick={lineConsult} className="tap"
-                style={{marginLeft:"auto",padding:"6px 12px",borderRadius:20,border:"1px solid rgba(255,215,0,.32)",background:"transparent",color:"#FFD700",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-                LINE 優先諮詢
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* ── TICKER ── */}
-        <Ticker/>
-
-        {/* ── TABS ── */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:5,padding:"11px 14px 0"}}>
-          {[["calc","📊計算"],["plan","📋計畫"],["food","🥘飲食"],["ai","🤖AI"],["dining","🍽️外食"]].map(([id,l])=>(
-            <button key={id} onClick={()=>setTab(id)} className="tap"
-              style={{padding:"10px 2px",borderRadius:11,border:tab===id?"none":"1px solid #1f1f1f",cursor:"pointer",fontSize:10,fontWeight:800,transition:"all .2s",background:tab===id?"#CCFF00":"transparent",color:tab===id?"#000":"#4B5563"}}>
-              {l}
+      {/* Gender */}
+      <div className="card">
+        <span style={lbl}>性別 GENDER</span>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+          {[["male","♂ 男性"],["female","♀ 女性"]].map(([v,l2])=>(
+            <button key={v} onClick={()=>setGender(v)} className="tap"
+              style={{padding:"13px 0",borderRadius:11,border:"none",cursor:"pointer",fontSize:15,fontWeight:800,transition:"all .22s",background:gender===v?"#CCFF00":"#1a1a1a",color:gender===v?"#000":"#4B5563",boxShadow:gender===v?"0 0 22px rgba(204,255,0,.38)":"none"}}>
+              {l2}
             </button>
           ))}
         </div>
+      </div>
 
-        <div style={{padding:"14px 16px 148px"}}>
+      {/* Body stats */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:9,marginBottom:14}}>
+        {[["體重","kg",weight,setWeight,"70"],["身高","cm",height,setHeight,"175"],["年齡","歲",age,setAge,"25"]].map(([l2,u,v,s,ph])=>(
+          <div key={l2} className="card" style={{marginBottom:0}}>
+            <span style={lbl}>{l2}</span>
+            <input type="number" inputMode="decimal" value={v} onChange={e=>s(e.target.value)} placeholder={ph}
+              style={{width:"100%",background:"transparent",border:"none",color:"#F9FAFB",fontSize:28,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",letterSpacing:1}}/>
+            <div style={{fontSize:11,color:"#4B5563",marginTop:2}}>{u}</div>
+          </div>
+        ))}
+      </div>
 
-          {/* ════ CALC ════ */}
-          {tab==="calc"&&(
-            <div>
-              {/* David Persona */}
-              <DavidPersona onTired={()=>setTiredOpen(true)}/>
-
-              {(logs.length>0||streak>0)&&<StreakBar streak={streak} cnt={logs.length}/>}
-              {streak>0&&<BadgePop streak={streak}/>}
-
-              {/* Goal */}
-              <div className="card"><GoalSelector goal={goal} setGoal={setGoal}/></div>
-
-              {/* Gender */}
-              <div className="card">
-                <span style={lbl}>性別 GENDER</span>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
-                  {[["male","♂ 男性"],["female","♀ 女性"]].map(([v,l2])=>(
-                    <button key={v} onClick={()=>setGender(v)} className="tap"
-                      style={{padding:"13px 0",borderRadius:11,border:"none",cursor:"pointer",fontSize:15,fontWeight:800,transition:"all .22s",background:gender===v?"#CCFF00":"#1a1a1a",color:gender===v?"#000":"#4B5563",boxShadow:gender===v?"0 0 22px rgba(204,255,0,.38)":"none"}}>
-                      {l2}
-                    </button>
-                  ))}
-                </div>
+      {/* Activity */}
+      <div className="card">
+        <span style={lbl}>活動係數 ACTIVITY</span>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {ACTS.map(o=>(
+            <button key={o.v} onClick={()=>setAct(o.v)} className="tap"
+              style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 12px",borderRadius:11,border:`1px solid ${act===o.v?"#CCFF00":"#1f1f1f"}`,cursor:"pointer",transition:"all .18s",background:act===o.v?"rgba(204,255,0,.06)":"transparent",textAlign:"left",width:"100%"}}>
+              <span style={{fontSize:18,flexShrink:0,marginTop:1}}>{o.s}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:act===o.v?800:500,color:act===o.v?"#CCFF00":"#D1D5DB"}}>{o.l}</div>
+                <div style={{fontSize:11,color:"#6B7280",marginTop:2}}>{o.d}</div>
               </div>
+              {act===o.v && <span style={{color:"#CCFF00",fontWeight:900,fontSize:14,flexShrink:0,marginTop:1}}>✓</span>}
+            </button>
+          ))}
+        </div>
+      </div>
 
-              {/* Stats */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:9,marginBottom:14}}>
-                {[["體重","kg",weight,setWeight,"70"],["身高","cm",height,setHeight,"175"],["年齡","歲",age,setAge,"25"]].map(([l2,u,v,s,ph])=>(
-                  <div key={l2} className="card" style={{marginBottom:0}}>
-                    <span style={lbl}>{l2}</span>
-                    <input type="number" value={v} onChange={e=>s(e.target.value)} placeholder={ph}
-                      style={{width:"100%",background:"transparent",border:"none",color:"#F9FAFB",fontSize:28,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",letterSpacing:1}}/>
-                    <div style={{fontSize:11,color:"#4B5563",marginTop:3}}>{u}</div>
+      {/* NEA */}
+      <div className="card">
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+          <span style={{fontSize:10,color:"#FF9500",letterSpacing:3,fontWeight:700}}>NEA 非運動消耗（選填）</span>
+          {neaChecked.length>0 && <span style={{fontSize:11,fontWeight:700,color:"#FF9500",marginLeft:"auto"}}>+{neaChecked.length*80} kcal</span>}
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:7}}>
+          {NEA_OPTIONS.map(o=>{
+            const checked = neaChecked.includes(o.id);
+            return (
+              <button key={o.id} onClick={()=>toggleNea(o.id)} className="tap"
+                style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:11,border:`1px solid ${checked?"#FF9500":"#1f1f1f"}`,cursor:"pointer",background:checked?"rgba(255,149,0,.06)":"transparent",textAlign:"left",width:"100%",transition:"all .18s"}}>
+                <div style={{width:20,height:20,borderRadius:6,border:`1.5px solid ${checked?"#FF9500":"#333"}`,background:checked?"#FF9500":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .18s"}}>
+                  {checked && <span style={{color:"#000",fontSize:12,fontWeight:900}}>✓</span>}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:checked?700:400,color:checked?"#D1D5DB":"#9CA3AF"}}>{o.label}</div>
+                </div>
+                <span style={{fontSize:11,color:"#FF9500",flexShrink:0,fontWeight:700}}>+{o.kcal}</span>
+              </button>
+            );
+          })}
+        </div>
+        {neaChecked.length>0 && (
+          <div style={{marginTop:10,padding:"9px 12px",background:"rgba(255,149,0,.08)",borderRadius:10,border:"1px solid rgba(255,149,0,.2)",fontSize:11,color:"#FF9500"}}>
+            ⚡ 今日 NEA 額外消耗 {neaChecked.length*80} kcal，已加入 TDEE 計算
+          </div>
+        )}
+      </div>
+
+      {/* Calc Button */}
+      <button ref={calcRef} onClick={handleCalc} className="rh gg tap"
+        style={{width:"100%",padding:18,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:16,cursor:"pointer",fontSize:16,fontWeight:900,color:"#000",letterSpacing:.5,marginBottom:22}}>
+        🚀 大衛教練，幫我規劃今日任務
+      </button>
+
+      {/* Results */}
+      {res && (
+        <div key={animKey} className="au">
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:16}}>
+            {[
+              ["TDEE",res.tdee,"kcal/日","#CCFF00"],
+              ["🎯 "+res.goalLabel,res.goalTarget,"kcal/日",res.goalColor],
+              ["💪 蛋白質",res.prot,"g/日","#FF9500"],
+              ["BMI",res.bmi,"","#FF4488"],
+            ].map(([l2,v,u,c])=>(
+              <div key={l2} style={{background:"#0c0c0c",borderRadius:14,padding:16,border:`1.5px solid ${c}20`,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}}/>
+                <div style={{fontSize:10,color:"#4B5563",letterSpacing:2,marginBottom:4}}>{l2}</div>
+                <div style={{fontSize:32,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:c,lineHeight:1,letterSpacing:1}}>{v}</div>
+                <div style={{fontSize:11,color:"#374151",marginTop:3}}>{u}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Coach comment */}
+          <div className="card" style={{marginBottom:14,border:`1.5px solid ${gi.color}22`}}>
+            <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+              <div style={{width:36,height:36,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👨‍💻</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:900,color:"#CCFF00"}}>大衛教練今日指令</div>
+                <div style={{fontSize:10,color:"#4B5563"}}>{gi.icon} {gi.label}模式</div>
+              </div>
+            </div>
+            <div style={{fontSize:12,color:"#D1D5DB",lineHeight:1.9,marginBottom:13}}>{COMMENT[gender][tdeeLevel]}</div>
+            {[
+              {c:"#CCFF00",icon:"🔥",title:"熱量任務",items:[`目標攝取 ${res.goalTarget} kcal (TDEE ${res.tdee} ${res.goalDelta})`,`分 4–5 餐，每餐間隔不超過 4 小時`,"訓練後 30 分鐘補充碳水 + 蛋白質"]},
+              {c:"#FF9500",icon:"💪",title:"蛋白質任務",items:[`全天蛋白質目標：${res.prot}g`,`每餐至少 ${Math.round(res.prot/5)}–${Math.round(res.prot/4)}g`,goal==="cut"?"優先：雞胸、水煮蛋、希臘優格":"優先：雞胸、鮪魚、水煮蛋、豆漿"]},
+              {c:"#38BDF8",icon:"🌙",title:"生活習慣",items:["喝水：體重 × 35ml","睡眠 7–8 小時，生長激素深睡分泌","訓練後拉伸 10 分鐘，加速恢復"]},
+            ].map(sec=>(
+              <div key={sec.title} style={{marginBottom:9,padding:"11px 12px",background:"#111",borderRadius:12,borderLeft:`3px solid ${sec.c}`}}>
+                <div style={{fontSize:12,fontWeight:900,color:sec.c,marginBottom:7}}>{sec.icon} {sec.title}</div>
+                {sec.items.map((it,i)=>(
+                  <div key={i} style={{display:"flex",gap:8,padding:"3px 0",fontSize:12,color:"#9CA3AF",lineHeight:1.7}}>
+                    <span style={{color:sec.c,flexShrink:0}}>▸</span>{it}
                   </div>
                 ))}
               </div>
+            ))}
+          </div>
 
-              {/* Activity */}
-              <div className="card">
-                <span style={lbl}>活動係數 ACTIVITY</span>
-                <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                  {ACTS.map(o=>(
-                    <button key={o.v} onClick={()=>setAct(o.v)} className="tap"
-                      style={{display:"flex",alignItems:"center",gap:10,padding:"10px 13px",borderRadius:11,border:`1px solid ${act===o.v?"#CCFF00":"#1f1f1f"}`,cursor:"pointer",transition:"all .18s",background:act===o.v?"rgba(204,255,0,.06)":"transparent",textAlign:"left",width:"100%"}}>
-                      <span style={{fontSize:18,flexShrink:0}}>{o.s}</span>
-                      <span style={{fontSize:13,fontWeight:act===o.v?800:500,color:act===o.v?"#CCFF00":"#4B5563"}}>{o.l}</span>
-                      {act===o.v&&<span style={{marginLeft:"auto",color:"#CCFF00",fontWeight:900,fontSize:13}}>✓</span>}
-                    </button>
-                  ))}
-                </div>
+          <WorkoutPlan goal={goal}/>
+
+          {/* Save + Share */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:10}}>
+            <button ref={saveRef} onClick={handleSave} className={`rh tap ${saved?"":"gg"}`}
+              style={{padding:14,borderRadius:13,border:`2px solid ${saved?"#CCFF00":"transparent"}`,background:saved?"#CCFF00":"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all .3s"}}>
+              {saved?"✅ 已回報戰果":"✅ 回報今日戰果"}
+            </button>
+            <button onClick={()=>setShowShare(s=>!s)} className="tap"
+              style={{padding:14,borderRadius:13,border:"2px solid #FF9500",background:"transparent",color:"#FF9500",cursor:"pointer",fontSize:13,fontWeight:800}}>
+              📋 生成任務卡
+            </button>
+          </div>
+
+          {showShare && (
+            <div className="cr" style={{background:"linear-gradient(135deg,#0c0c0a,#121210)",border:"1.5px solid #CCFF00",borderRadius:20,padding:21,marginBottom:14,boxShadow:"0 0 50px rgba(204,255,0,.1)"}}>
+              <div style={{fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:4}}>COACH DAVID · 今日增肌任務卡</div>
+              <div style={{fontSize:11,color:"#4B5563",marginBottom:14}}>{new Date().toLocaleDateString("zh-TW",{month:"long",day:"numeric"})} · {gi.icon}{gi.label}</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                {[["TDEE",res.tdee,"kcal","#CCFF00"],["目標",res.goalTarget,"kcal",res.goalColor],["蛋白質",res.prot,"g","#FF9500"],["BMI",res.bmi,"","#FF4488"]].map(([l2,v,u,c])=>(
+                  <div key={l2} style={{background:"rgba(255,255,255,.022)",borderRadius:10,padding:"10px 10px",border:`1px solid ${c}16`}}>
+                    <div style={{fontSize:9,color:"#4B5563",marginBottom:2}}>{l2}</div>
+                    <div style={{fontSize:24,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:c,lineHeight:1}}>{v}<span style={{fontSize:10,color:"#374151",marginLeft:2}}>{u}</span></div>
+                  </div>
+                ))}
               </div>
+              <div style={{textAlign:"center",marginTop:10,fontSize:10,color:"#374151",letterSpacing:1}}>長按截圖，分享至 IG Story 🚀</div>
+            </div>
+          )}
 
-              {/* Calc Btn */}
-              <button ref={calcRef} onClick={handleCalc} className={`rh tap ${isFlame?"gf":"gg"}`}
-                style={{width:"100%",padding:19,background:isFlame?"linear-gradient(135deg,#ff5500,#ffdd00)":"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:16,cursor:"pointer",fontSize:16,fontWeight:900,color:"#000",letterSpacing:.5,marginBottom:22}}>
-                {isFlame?"🔥 大衛教練，幫我規劃今日任務！":"🚀 大衛教練，幫我規劃今日任務"}
-              </button>
-
-              {/* Results */}
-              {res&&(
-                <div key={animKey} className="au">
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:16}}>
-                    {[["TDEE",res.tdee,"kcal/日","#CCFF00"],["🎯 "+res.goalLabel,res.goalTarget,"kcal/日",res.goalColor],["💪 蛋白質",res.prot,"g/日","#FF9500"],["BMI",res.bmi,"","#FF4488"]].map(([l2,v,u,c])=>(
-                      <div key={l2} style={{background:"#0c0c0c",borderRadius:14,padding:16,border:`1.5px solid ${c}20`,position:"relative",overflow:"hidden"}}>
-                        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}}/>
-                        <div style={{fontSize:10,color:"#4B5563",letterSpacing:2,marginBottom:5}}>{l2}</div>
-                        <div style={{fontSize:32,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:c,lineHeight:1,letterSpacing:1}}>{v}</div>
-                        <div style={{fontSize:11,color:"#374151",marginTop:4}}>{u}</div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* coach comment */}
-                  <div className="card" style={{marginBottom:14,border:`1.5px solid ${gi.color}22`}}>
-                    <div style={{display:"flex",gap:11,alignItems:"center",marginBottom:12}}>
-                      <div style={{width:37,height:37,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>👨‍💻</div>
-                      <div><div style={{fontSize:14,fontWeight:900,color:"#CCFF00"}}>大衛教練今日指令</div><div style={{fontSize:10,color:"#4B5563"}}>{gi.icon} {gi.label}模式</div></div>
-                    </div>
-                    <div style={{fontSize:12,color:"#D1D5DB",lineHeight:1.9,marginBottom:13}}>{res.comment}</div>
-                    {[{clr:"#CCFF00",icon:"🔥",title:"熱量任務",items:[`目標攝取 ${res.goalTarget}kcal (TDEE ${res.tdee} ${goal==="muscle"?"+300":goal==="cut"?"-400":"±0"})`,`分 4–5 餐，每餐間隔不超過 4 小時`,"訓練後 30 分鐘補充碳水 + 蛋白質"]},{clr:"#FF9500",icon:"💪",title:"蛋白質任務",items:[`全天蛋白質目標：${res.prot}g`,`每餐至少 ${Math.round(res.prot/5)}–${Math.round(res.prot/4)}g`,goal==="cut"?"優先：雞胸、水煮蛋、希臘優格":"優先：雞胸、鮪魚、水煮蛋、豆漿"]},{clr:"#38BDF8",icon:"🌙",title:"生活習慣",items:["喝水：體重 × 35ml","睡眠 7–8 小時，生長激素深睡分泌","訓練後拉伸 10 分鐘，加速恢復"]}].map(sec=>(
-                      <div key={sec.title} style={{marginBottom:10,padding:"11px 13px",background:"#111",borderRadius:12,borderLeft:`3px solid ${sec.clr}`}}>
-                        <div style={{fontSize:12,fontWeight:900,color:sec.clr,marginBottom:8}}>{sec.icon} {sec.title}</div>
-                        {sec.items.map((it,i)=>(
-                          <div key={i} style={{display:"flex",gap:8,padding:"4px 0",fontSize:12,color:"#9CA3AF",lineHeight:1.7}}>
-                            <span style={{color:sec.clr,flexShrink:0}}>▸</span>{it}
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                  <WorkoutPlan goal={goal}/>
-                  {/* save + share */}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:10}}>
-                    <button ref={saveRef} onClick={handleSave} className={`rh tap ${saved?"":"gg"}`}
-                      style={{padding:14,borderRadius:13,border:`2px solid ${saved?"#CCFF00":"#38BDF8"}`,background:saved?"#CCFF00":"transparent",color:saved?"#000":"#38BDF8",cursor:"pointer",fontSize:13,fontWeight:800,transition:"all .3s"}}>
-                      {saved?"✅ 已回報戰果":"✅ 回報戰果"}
-                    </button>
-                    <button onClick={()=>setShowShare(s=>!s)} className="tap"
-                      style={{padding:14,borderRadius:13,border:"2px solid #FF9500",background:"transparent",color:"#FF9500",cursor:"pointer",fontSize:13,fontWeight:800}}>
-                      📸 生成任務卡
-                    </button>
-                  </div>
-                  {saved&&<div style={{fontSize:11,color:"#4B5563",textAlign:"center",marginBottom:10}}>數據已儲存 · 累積 {logs.length} 天</div>}
-                  {showShare&&(
-                    <div className="cr" style={{background:"linear-gradient(135deg,#0c0c0a,#121210,#0c0c0a)",border:"1.5px solid #CCFF00",borderRadius:20,padding:21,marginTop:2,boxShadow:"0 0 50px rgba(204,255,0,.12)",position:"relative",overflow:"hidden"}}>
-                      <div style={{position:"absolute",top:-22,right:-22,width:100,height:100,borderRadius:"50%",background:"radial-gradient(circle,rgba(204,255,0,.06),transparent 70%)",pointerEvents:"none"}}/>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-                        <div>
-                          <div style={{fontSize:10,color:"#CCFF00",letterSpacing:3,fontWeight:700,marginBottom:2}}>COACH DAVID</div>
-                          <div style={{fontSize:18,fontWeight:900,color:"#F9FAFB"}}>今日增肌任務卡</div>
-                          <div style={{fontSize:10,color:"#4B5563",marginTop:2}}>{new Date().toLocaleDateString("zh-TW",{month:"long",day:"numeric"})} · {gi.icon}{gi.label}</div>
-                        </div>
-                        {isVip?<div style={{padding:"4px 10px",background:"linear-gradient(135deg,#FFD700,#FF8800)",borderRadius:9,fontSize:10,fontWeight:900,color:"#000"}}>👑 VIP</div>:<div style={{padding:"4px 10px",background:"#CCFF00",borderRadius:9,fontSize:10,fontWeight:900,color:"#000"}}>v6.1</div>}
-                      </div>
-                      <div style={{height:1,background:"linear-gradient(90deg,#CCFF00,transparent)",marginBottom:14}}/>
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:12}}>
-                        {[["🔥 TDEE",res.tdee,"kcal","#CCFF00"],["🎯 "+res.goalLabel,res.goalTarget,"kcal",res.goalColor],["💪 蛋白質",res.prot,"g","#FF9500"],["📊 BMI",res.bmi,"","#FF4488"]].map(([l2,v,u,c])=>(
-                          <div key={l2} style={{background:"rgba(255,255,255,.022)",borderRadius:10,padding:"11px 10px",border:`1px solid ${c}16`}}>
-                            <div style={{fontSize:9,color:"#4B5563",marginBottom:3}}>{l2}</div>
-                            <div style={{fontSize:25,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:c,lineHeight:1,letterSpacing:1}}>{v}<span style={{fontSize:10,color:"#374151",marginLeft:2}}>{u}</span></div>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{textAlign:"center",marginTop:8,fontSize:10,color:"#374151",letterSpacing:1}}>長按截圖，分享至 IG Story 🚀</div>
-                    </div>
-                  )}
-                  <button onClick={()=>handleNeedVip("解鎖進階 30 天計畫")} className="tap"
-                    style={{width:"100%",padding:"13px 0",background:"linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,136,0,.06))",border:"1px solid rgba(255,215,0,.28)",borderRadius:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:9,marginTop:10}}>
-                    <span style={{fontSize:15}}>🔓</span>
-                    <span style={{fontSize:13,fontWeight:800,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>解鎖進階 30 天計畫</span>
-                    <span style={{fontSize:10,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>VIP</span>
-                  </button>
-                </div>
-              )}
-
-              {/* History */}
-              {logs.length>0&&(
-                <div className="card" style={{marginTop:10}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                    <div style={{fontSize:13,fontWeight:800,color:"#CCFF00"}}>📅 逆襲紀錄（{logs.length}天）</div>
-                    <button onClick={handleClear} className="gr tap" style={{padding:"5px 12px",borderRadius:20,border:"1px solid rgba(255,68,68,.35)",background:"transparent",color:"#FF4444",fontSize:11,fontWeight:700,cursor:"pointer"}}>🗑 重設</button>
-                  </div>
-                  <div className="tsc">
-                    <table>
-                      <thead><tr>{["日期","TDEE","目標","蛋白質"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-                      <tbody>{logs.map(l=>{const iT=l.date===isoToday();return(
-                        <tr key={l.date} style={{background:iT?"rgba(204,255,0,.05)":"transparent"}}>
-                          <td style={{fontWeight:700,color:iT?"#CCFF00":"#6B7280"}}>{l.label}{iT&&<span style={{fontSize:9,marginLeft:4,color:"#CCFF00"}}>今</span>}</td>
+          {/* History */}
+          {(appState.logs||[]).length>0 && (
+            <div className="card">
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:13}}>
+                <div style={{fontSize:13,fontWeight:800,color:"#CCFF00"}}>📅 逆襲紀錄（{(appState.logs||[]).length}天）</div>
+                <button onClick={()=>setAppState(s=>({...s,logs:[]}))} className="tap"
+                  style={{padding:"5px 11px",borderRadius:20,border:"1px solid rgba(255,68,68,.35)",background:"transparent",color:"#FF4444",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  🗑 重設
+                </button>
+              </div>
+              <div className="tsc">
+                <table>
+                  <thead><tr>{["日期","TDEE","目標","蛋白質"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                  <tbody>
+                    {(appState.logs||[]).map(l=>{
+                      const isT = l.date===isoToday();
+                      return (
+                        <tr key={l.date} style={{background:isT?"rgba(204,255,0,.05)":"transparent"}}>
+                          <td style={{fontWeight:700,color:isT?"#CCFF00":"#6B7280"}}>{l.label}{isT&&<span style={{fontSize:9,marginLeft:4,color:"#CCFF00"}}>今</span>}</td>
                           <td style={{fontWeight:700,color:"#F9FAFB"}}>{l.tdee}</td>
                           <td style={{fontWeight:700,color:"#38BDF8"}}>{l.goal}</td>
                           <td style={{fontWeight:700,color:"#FF9500"}}>{l.prot}g</td>
                         </tr>
-                      );})}</tbody>
-                    </table>
-                  </div>
-                  <MonthlyReport logs={logs} targetProt={res?.prot} onNeedVip={handleNeedVip}/>
-                </div>
-              )}
-              {!res&&logs.length===0&&(
-                <div style={{textAlign:"center",padding:"32px 0",color:"#2d2d2d",fontSize:13,lineHeight:2.2}}>
-                  ☝️ 選擇目標並填寫數據<br/>大衛教練立刻幫你規劃今日任務
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ════ PLAN ════ */}
-          {tab==="plan"&&(
-            <div>
-              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,padding:"12px 14px",background:"#0a0a0a",borderRadius:12,borderLeft:"3px solid #CCFF00",lineHeight:1.85}}>
-                📋 <span style={{color:"#CCFF00",fontWeight:800}}>7 天訓練 + 飲食計畫</span> — 第 1 天完整免費體驗，感受大衛教練的專業度。
-              </div>
-              {/* Day 1 FREE */}
-              <Day1Preview/>
-              {/* Days 2-7 */}
-              {!isVip?(
-                <>
-                  <LockedDays onNeedVip={handleNeedVip}/>
-                  <button onClick={()=>handleNeedVip("第 2–7 天完整計畫")} className="rh gf tap"
-                    style={{width:"100%",padding:16,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:14,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",lineHeight:1.7,marginBottom:14}}>
-                    💬 LINE 解鎖全套 7 天計畫<br/>
-                    <span style={{fontSize:12,fontWeight:700,opacity:.85}}>NT$199 · 一次解鎖，永久使用</span>
-                  </button>
-                </>
-              ):(
-                <FullWeekPlan/>
-              )}
-              {/* 12-week locked */}
-              <button onClick={()=>handleNeedVip("12 週訓練課表")} className="tap"
-                style={{width:"100%",padding:"14px 0",background:"linear-gradient(135deg,rgba(255,215,0,.07),rgba(255,136,0,.05))",border:"1.5px solid rgba(255,215,0,.28)",borderRadius:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:11,marginBottom:14}}>
-                <span style={{fontSize:18}}>📋</span>
-                <div style={{textAlign:"left"}}><div style={{fontSize:14,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>12 週增肌訓練課表</div><div style={{fontSize:11,color:"#4B5563"}}>完整週期化計畫 · PDF 下載</div></div>
-                <span style={{marginLeft:"auto",fontSize:10,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginRight:5}}>🔐 VIP</span>
-              </button>
-            </div>
-          )}
-
-          {/* ════ FOOD ════ */}
-          {tab==="food"&&(
-            <div>
-              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,padding:"12px 14px",background:"#0a0a0a",borderRadius:12,borderLeft:"3px solid #CCFF00",lineHeight:1.85}}>
-                🥘 <span style={{color:"#CCFF00",fontWeight:800}}>智能飲食換算</span> — 說出你吃了什麼，AI 自動計算蛋白質與熱量。
-              </div>
-              <NLPFood goal={goal} isVip={isVip} onNeedVip={handleNeedVip}/>
-              {/* premium locked guide */}
-              <div style={{position:"relative",borderRadius:16,overflow:"hidden",marginBottom:14}}>
-                <div className="blk" style={{padding:18,background:"#0a0a0a",borderRadius:16,border:"1px solid #1f1f1f"}}>
-                  {["教練私藏外食避坑指南 — 火鍋篇","便當店增肌點法指南","夜市吃不胖攻略","深夜不囤脂宵夜組合","訓練後黃金視窗補充清單","飯局喝酒後的急救方案"].map((c,i)=>(
-                    <div key={i} style={{fontSize:12,color:"#333",padding:"5px 0",borderBottom:"1px solid #0f0f0f",display:"flex",gap:8}}><span>▸</span>{c}</div>
-                  ))}
-                  <div style={{height:40}}/>
-                </div>
-                <div className="lov">
-                  <div style={{fontSize:30}}>🔒</div>
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:15,fontWeight:900,color:"#F9FAFB",marginBottom:4}}>教練私藏外食指南</div>
-                    <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.85}}>大衛教練親自整理的避坑地圖</div>
-                  </div>
-                  <button onClick={()=>handleNeedVip("私藏外食避坑指南")} className="rh gg tap"
-                    style={{padding:"12px 24px",background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:12,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000",lineHeight:1.65,textAlign:"center"}}>
-                    🔓 VIP 解鎖 NT$199
-                  </button>
-                </div>
-              </div>
-              {/* food ref */}
-              <div className="card">
-                <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:11}}>📊 常用食物速查</div>
-                <div className="tsc">
-                  <table>
-                    <thead><tr>{["食物","熱量","蛋白質","類別"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-                    <tbody>
-                      {FOOD_DB.filter(f=>["超商","通用"].includes(f[5])).slice(0,12).map((f,i)=>(
-                        <tr key={i} style={{borderBottom:"1px solid #141414"}}>
-                          <td style={{color:"#E5E7EB",fontWeight:600}}>{f[0]}</td>
-                          <td style={{color:"#CCFF00",fontWeight:700}}>{f[1]}</td>
-                          <td style={{color:"#FF9500",fontWeight:700}}>{f[2]}g</td>
-                          <td style={{color:"#6B7280"}}>{f[5]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════ AI ════ */}
-          {tab==="ai"&&(
-            <div>
-              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,padding:"12px 14px",background:"#0a0a0a",borderRadius:12,borderLeft:"3px solid #CCFF00",lineHeight:1.85}}>
-                🤖 <span style={{color:"#CCFF00",fontWeight:800}}>Claude AI 驅動</span> — 具備目標意識，{isVip?"VIP 可拍照送教練真人審核。":"解鎖 VIP 可拍照送教練真人審核。"}
-              </div>
-              <div className="card" style={{marginBottom:14}}><GoalSelector goal={goal} setGoal={setGoal}/></div>
-              <AIChat res={res} goal={goal} isVip={isVip} onPhotoAudit={handlePhotoAudit}/>
-              {isVip&&(
-                <div style={{background:"linear-gradient(135deg,rgba(255,215,0,.07),rgba(255,136,0,.05))",border:"1px solid rgba(255,215,0,.22)",borderRadius:14,padding:"13px 15px",display:"flex",gap:11,alignItems:"center"}}>
-                  <span style={{fontSize:20}}>👑</span>
-                  <div><div className="vs" style={{fontSize:12,fontWeight:900,letterSpacing:1,marginBottom:3}}>私訊優先通道</div><div style={{fontSize:11,color:"#9CA3AF"}}>你的問題大衛教練親自優先回覆</div></div>
-                  <button onClick={lineConsult} className="rh tap"
-                    style={{marginLeft:"auto",padding:"8px 13px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#FFD700,#FF8800)",cursor:"pointer",fontSize:12,fontWeight:900,color:"#000",flexShrink:0}}>
-                    LINE 優先
-                  </button>
-                </div>
-              )}
-              {!isVip&&(
-                <button onClick={lineConsult} className="rh gg tap"
-                  style={{width:"100%",padding:15,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:14,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:9}}>
-                  <span style={{fontSize:20}}>📅</span>想大衛教練親自指導？立即預約
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* ════ DINING ════ */}
-          {tab==="dining"&&(
-            <div>
-              <div style={{fontSize:12,color:"#6B7280",marginBottom:14,padding:"12px 14px",background:"#0a0a0a",borderRadius:12,borderLeft:"3px solid #CCFF00",lineHeight:1.85}}>
-                🍽️ <span style={{color:"#CCFF00",fontWeight:800}}>外食生存指南</span> — 免費基礎攻略公開，進階私藏指南 VIP 解鎖。
-              </div>
-
-              {/* free quick guide */}
-              {[
-                {store:"超商快攻",color:"#CCFF00",icon:"🏪",items:[
-                  {ok:true,item:"義式雞胸肉 + 無糖豆漿",why:"25g 蛋白質，超商最強 CP 組合"},
-                  {ok:true,item:"茶葉蛋 ×2 + 希臘優格",why:"20g 蛋白質，隨時補充零難度"},
-                  {ok:false,item:"全糖珍珠奶茶",why:"60g 精製糖、零蛋白質，增肌地雷"},
-                ]},
-                {store:"速食快攻",color:"#FF9500",icon:"🍔",items:[
-                  {ok:true,item:"麥辣雞腿堡 + 玉米杯",why:"29g 蛋白質，薯條換玉米省 280kcal"},
-                  {ok:true,item:"黑咖啡（無糖）",why:"提神零熱量，訓練前最佳"},
-                  {ok:false,item:"薯條 + 含糖飲料",why:"高GI + 精製糖，雙重地雷"},
-                ]},
-              ].map(g=>(
-                <div key={g.store} style={{marginBottom:14,background:"#0a0a0a",borderRadius:16,overflow:"hidden",border:`1px solid ${g.color}18`}}>
-                  <div style={{padding:"10px 14px",borderBottom:"1px solid #1a1a1a",display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:17}}>{g.icon}</span>
-                    <span style={{fontSize:13,fontWeight:900,color:g.color}}>{g.store}</span>
-                    <span style={{marginLeft:"auto",fontSize:10,color:"#CCFF00",background:"rgba(204,255,0,.12)",padding:"2px 8px",borderRadius:20,fontWeight:700}}>FREE</span>
-                  </div>
-                  <div style={{padding:"12px 14px"}}>
-                    {g.items.map((item,i)=>(
-                      <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<g.items.length-1?"1px solid #111":"none",alignItems:"flex-start"}}>
-                        <span style={{fontSize:14,flexShrink:0,marginTop:1}}>{item.ok?"✅":"🚫"}</span>
-                        <div><div style={{fontSize:12,fontWeight:800,color:item.ok?"#E5E7EB":"#9CA3AF",marginBottom:2}}>{item.item}</div><div style={{fontSize:11,color:"#6B7280",lineHeight:1.65}}>{item.why}</div></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* locked premium guide */}
-              <div style={{position:"relative",borderRadius:16,overflow:"hidden",marginBottom:14}}>
-                <div className="blk" style={{padding:18,background:"#0a0a0a",borderRadius:16,border:"1px solid #1f1f1f"}}>
-                  {["火鍋增肌點菜完整指南","自助餐蛋白質最大化策略","夜市吃不胖完整攻略","便當店點法 SOP","飯局喝酒後急救方案","訓練日 vs 休息日外食差異"].map((c,i)=>(
-                    <div key={i} style={{fontSize:12,color:"#333",padding:"5px 0",borderBottom:"1px solid #0f0f0f",display:"flex",gap:8}}><span>▸</span>{c}</div>
-                  ))}
-                  <div style={{height:45}}/>
-                </div>
-                <div className="lov">
-                  <div style={{fontSize:32}}>🔒</div>
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:16,fontWeight:900,color:"#F9FAFB",marginBottom:4}}>6 大場景完整攻略</div>
-                    <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.85}}>大衛教練親自設計的科學邏輯</div>
-                  </div>
-                  <button onClick={()=>handleNeedVip("私藏外食完整攻略")} className="rh gg tap"
-                    style={{padding:"13px 26px",background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:12,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",textAlign:"center",lineHeight:1.7}}>
-                    💬 LINE 解鎖 NT$199
-                  </button>
-                </div>
-              </div>
-
-              {/* golden rules */}
-              <div style={{background:"#0d0d0a",borderRadius:16,padding:18,border:"1.5px solid #ccff0020"}}>
-                <div style={{fontSize:14,fontWeight:900,color:"#CCFF00",marginBottom:14}}>⚡ 黃金法則（免費放送）</div>
-                {["每餐蛋白質：體重 × 0.4g，缺口靠蛋和豆漿補","碳水控制：一個拳頭大小 = 一份，不過量","進食順序：蛋白質 → 蔬菜 → 碳水，血糖穩定","訓練日多吃 200–300kcal 碳水，促進合成","睡前補充 20–30g 酪蛋白，夜間增肌不停歇"].map((r,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"10px 0",borderBottom:i<4?"1px solid #111":"none"}}>
-                    <div style={{width:25,height:25,background:"#CCFF00",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"#000",flexShrink:0,marginTop:1}}>{i+1}</div>
-                    <div style={{fontSize:13,color:"#D1D5DB",lineHeight:1.75}}>{r}</div>
-                  </div>
-                ))}
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
         </div>
+      )}
+
+      {!res && (
+        <div style={{textAlign:"center",padding:"28px 0",color:"#2d2d2d",fontSize:13,lineHeight:2.2}}>
+          ☝️ 選擇目標並填寫數據<br/>大衛教練立刻幫你規劃今日任務
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════
+   TAB: TRACK (今日追蹤)
+════════════════════════════════════ */
+function TrackTab({appState, setAppState, onToast}) {
+  const {goal, trackEntries=[]} = appState;
+
+  // Derive target from saved TDEE result if exists
+  const logs = appState.logs||[];
+  const todayLog = logs.find(l=>l.date===isoToday());
+  const targetKcal = todayLog?.goal || 2000;
+  const targetProt = todayLog?.prot || 130;
+
+  const totalKcal = trackEntries.reduce((s,e)=>s+e.kcal,0);
+  const totalProt = trackEntries.reduce((s,e)=>s+e.prot,0);
+  const remKcal   = Math.max(targetKcal - totalKcal, 0);
+  const pctKcal   = Math.min((totalKcal/targetKcal)*100, 100);
+  const pctProt   = Math.min((totalProt/targetProt)*100, 100);
+  const overKcal  = totalKcal > targetKcal;
+
+  const [customName, setCustomName] = useState("");
+  const [customKcal, setCustomKcal] = useState("");
+  const [customProt, setCustomProt] = useState("");
+  const [showCustom, setShowCustom] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const addEntry = (name, kcal, prot) => {
+    const entry = {id:Date.now(), name, kcal:parseInt(kcal)||0, prot:parseInt(prot)||0, time:new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})};
+    setAppState(s=>({...s, trackEntries:[...(s.trackEntries||[]),entry]}));
+    onToast(`✅ 已記錄：${name} · ${entry.kcal}kcal`);
+  };
+
+  const removeEntry = (id) => setAppState(s=>({...s, trackEntries:(s.trackEntries||[]).filter(e=>e.id!==id)}));
+
+  const addCustom = () => {
+    if (!customName.trim()||!customKcal) { onToast("請填寫食物名稱和卡路里！"); return; }
+    addEntry(customName.trim(), customKcal, customProt||0);
+    setCustomName(""); setCustomKcal(""); setCustomProt(""); setShowCustom(false);
+  };
+
+  const clearToday = () => setAppState(s=>({...s, trackEntries:[]}));
+
+  const reportText = [
+    `📊 大衛教練 | 今日飲食追蹤報表`,
+    `📅 日期：${new Date().toLocaleDateString("zh-TW")}`,
+    ``,
+    `📥 飲食紀錄：`,
+    ...(trackEntries.length ? trackEntries.map(e=>`  ${e.time} · ${e.name}：${e.kcal}kcal / 蛋白${e.prot}g`) : ["  （今日尚無紀錄）"]),
+    ``,
+    `📈 今日合計：${totalKcal} kcal / 蛋白質 ${totalProt}g`,
+    `🎯 目標：${targetKcal} kcal / 蛋白質 ${targetProt}g`,
+    `✅ 達成率：熱量 ${Math.round(pctKcal)}% · 蛋白質 ${Math.round(pctProt)}%`,
+    overKcal ? `⚠️ 今日超標 ${totalKcal-targetKcal} kcal，明日注意調整。` : `💪 今日還可攝取 ${remKcal} kcal，繼續加油！`,
+    ``,
+    `— 透過大衛教練 AI 增肌決策系統 v6.3 生成`,
+  ].join("\n");
+
+  const copyReport = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(reportText).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); });
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = reportText; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+      setCopied(true); setTimeout(()=>setCopied(false),2000);
+    }
+  };
+
+  const gi = GOALS.find(g=>g.id===goal)||GOALS[0];
+
+  return (
+    <div>
+      {/* Progress */}
+      <div className="card">
+        <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:14}}>📊 今日進度</div>
+        {!todayLog && (
+          <div style={{fontSize:11,color:"#4B5563",marginBottom:12,padding:"8px 11px",background:"rgba(255,149,0,.07)",borderRadius:9,border:"1px solid rgba(255,149,0,.2)",lineHeight:1.8}}>
+            💡 先在「計算」Tab 計算 TDEE，目標數字才會精準
+          </div>
+        )}
+        {/* Kcal bar */}
+        {[
+          {label:"熱量攝取",cur:totalKcal,target:targetKcal,pct:pctKcal,color:overKcal?"#FF4444":"#CCFF00",unit:"kcal"},
+          {label:"蛋白質",  cur:totalProt,target:targetProt,pct:pctProt, color:"#FF9500",unit:"g"},
+        ].map(b=>(
+          <div key={b.label} style={{marginBottom:14}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+              <span style={{fontSize:12,fontWeight:700,color:"#D1D5DB"}}>{b.label}</span>
+              <span style={{fontSize:12,fontWeight:700,color:b.color,fontFamily:"'JetBrains Mono',monospace"}}>{b.cur}<span style={{color:"#4B5563"}}>/{b.target}{b.unit}</span></span>
+            </div>
+            <div style={{height:9,background:"#1a1a1a",borderRadius:5,overflow:"hidden"}}>
+              <div className="bf" style={{"--w":`${b.pct}%`,height:"100%",borderRadius:5,background:b.color,transition:"width .4s"}}/>
+            </div>
+            <div style={{fontSize:10,color:b.color,marginTop:4,textAlign:"right"}}>{Math.round(b.pct)}% 達成</div>
+          </div>
+        ))}
+        {overKcal && <div style={{padding:"9px 12px",background:"rgba(255,68,68,.08)",borderRadius:10,border:"1px solid rgba(255,68,68,.25)",fontSize:12,color:"#FF4444",fontWeight:700}}>⚠️ 今日超標 {totalKcal-targetKcal} kcal，明日注意調整</div>}
+        {!overKcal && totalKcal>0 && <div style={{padding:"9px 12px",background:"rgba(204,255,0,.06)",borderRadius:10,border:"1px solid rgba(204,255,0,.2)",fontSize:12,color:"#CCFF00",fontWeight:700}}>✅ 還可攝取 {remKcal} kcal，繼續加油！</div>}
       </div>
 
-      {/* Float CTA */}
+      {/* Quick Add */}
+      <div className="card">
+        <div style={{fontSize:13,fontWeight:900,color:"#CCFF00",marginBottom:12}}>⚡ 快速加入</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          {QUICK_FOODS.map(f=>(
+            <button key={f.name} onClick={()=>addEntry(f.name,f.kcal,f.prot)} className="rh tap"
+              style={{display:"flex",alignItems:"center",gap:8,padding:"10px 11px",background:"#0d0d0d",border:"1px solid #1f1f1f",borderRadius:12,cursor:"pointer",transition:"border-color .2s"}}>
+              <span style={{fontSize:18,flexShrink:0}}>{f.icon}</span>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontSize:11,fontWeight:700,color:"#D1D5DB"}}>{f.name}</div>
+                <div style={{fontSize:10,color:"#6B7280"}}>{f.kcal}kcal · {f.prot}g蛋白</div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <button onClick={()=>setShowCustom(s=>!s)} className="tap"
+          style={{width:"100%",padding:"11px 0",marginTop:9,borderRadius:11,border:"1.5px dashed #ccff0028",background:"transparent",color:"#CCFF00",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+          {showCustom?"▲ 收起":"＋ 手動輸入食物"}
+        </button>
+        {showCustom && (
+          <div className="au" style={{marginTop:11,padding:"14px 13px",background:"#0d0d0d",borderRadius:12,border:"1px solid #ccff0018"}}>
+            <input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="食物名稱"
+              style={{width:"100%",background:"#141414",border:"1px solid #2a2a2a",borderRadius:9,color:"#D1D5DB",padding:"10px 12px",fontSize:13,marginBottom:8}}/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+              <input type="number" inputMode="decimal" value={customKcal} onChange={e=>setCustomKcal(e.target.value)} placeholder="熱量 kcal"
+                style={{background:"#141414",border:"1px solid #2a2a2a",borderRadius:9,color:"#D1D5DB",padding:"10px 12px",fontSize:13}}/>
+              <input type="number" inputMode="decimal" value={customProt} onChange={e=>setCustomProt(e.target.value)} placeholder="蛋白質 g（選填）"
+                style={{background:"#141414",border:"1px solid #2a2a2a",borderRadius:9,color:"#D1D5DB",padding:"10px 12px",fontSize:13}}/>
+            </div>
+            <button onClick={addCustom} className="rh gg tap"
+              style={{width:"100%",padding:12,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:10,cursor:"pointer",fontSize:13,fontWeight:900,color:"#000"}}>
+              ＋ 加入紀錄
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Today's list */}
+      <div className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>📋 今日飲食清單</div>
+          {trackEntries.length>0 && (
+            <button onClick={clearToday} className="tap"
+              style={{fontSize:11,color:"#FF4444",background:"transparent",border:"1px solid rgba(255,68,68,.28)",borderRadius:20,padding:"4px 10px",cursor:"pointer"}}>
+              清空
+            </button>
+          )}
+        </div>
+        {trackEntries.length===0 ? (
+          <div style={{textAlign:"center",padding:"20px 0",color:"#2d2d2d",fontSize:12}}>尚未記錄任何食物<br/>點擊上方快速加入</div>
+        ) : (
+          trackEntries.map(e=>(
+            <div key={e.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #1a1a1a"}}>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:"#E5E7EB"}}>{e.name}</div>
+                <div style={{fontSize:11,color:"#6B7280",marginTop:1}}>{e.time}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#CCFF00"}}>{e.kcal}kcal</div>
+                  <div style={{fontSize:11,color:"#FF9500"}}>{e.prot}g蛋白</div>
+                </div>
+                <button onClick={()=>removeEntry(e.id)} className="tap"
+                  style={{width:24,height:24,background:"transparent",border:"none",color:"#374151",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  ✕
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+        {trackEntries.length>0 && (
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:12,paddingTop:12,borderTop:"1.5px solid #2a2a2a"}}>
+            <span style={{fontSize:13,fontWeight:800,color:"#D1D5DB"}}>合計</span>
+            <div style={{display:"flex",gap:12}}>
+              <span style={{fontSize:18,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#CCFF00",letterSpacing:1}}>{totalKcal}kcal</span>
+              <span style={{fontSize:18,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#FF9500",letterSpacing:1}}>{totalProt}g</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Report */}
+      <button onClick={()=>setShowReport(s=>!s)} className="rh gg tap"
+        style={{width:"100%",padding:15,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:14,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:9}}>
+        📊 一鍵生成今日報表
+      </button>
+
+      {showReport && (
+        <div className="cr" style={{background:"#0d0d0d",borderRadius:16,padding:18,border:"1.5px solid #ccff0028",marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+            <div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>📋 今日追蹤報表</div>
+            <div style={{display:"flex",gap:7}}>
+              <button onClick={copyReport} className="tap"
+                style={{padding:"6px 12px",borderRadius:20,border:"1px solid #ccff0030",background:copied?"#CCFF00":"transparent",color:copied?"#000":"#CCFF00",fontSize:11,fontWeight:700,cursor:"pointer",transition:"all .22s"}}>
+                {copied?"✓ 已複製":"複製"}
+              </button>
+              <button onClick={()=>lineReport(reportText)} className="tap"
+                style={{padding:"6px 12px",borderRadius:20,border:"none",background:"linear-gradient(135deg,#FFD700,#FF8800)",color:"#000",fontSize:11,fontWeight:900,cursor:"pointer"}}>
+                💬 傳給教練
+              </button>
+            </div>
+          </div>
+          <pre style={{fontSize:11,color:"#9CA3AF",lineHeight:1.9,whiteSpace:"pre-wrap",wordBreak:"break-word",fontFamily:"'JetBrains Mono',monospace"}}>{reportText}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════
+   TAB: PLAN
+════════════════════════════════════ */
+function PlanTab({appState, setAppState, onNeedVip}) {
+  const {isVip, goal} = appState;
+  const [openDay, setOpenDay] = useState(null);
+  const [expEx, setExpEx]   = useState(null);
+
+  return (
+    <div>
+      <div style={{fontSize:12,color:"#6B7280",marginBottom:14,padding:"12px 13px",background:"#0a0a0a",borderRadius:12,borderLeft:"3px solid #CCFF00",lineHeight:1.85}}>
+        📋 <span style={{color:"#CCFF00",fontWeight:800}}>第 1 天</span> 完整免費，感受大衛教練的專業度。第 2–7 天需 VIP 解鎖。
+      </div>
+
+      {/* Day 1 FREE */}
+      <div style={{background:"#0c0c0a",borderRadius:16,border:"1.5px solid #ccff0030",overflow:"hidden",marginBottom:14}}>
+        <div style={{background:"rgba(204,255,0,.06)",padding:"10px 15px",borderBottom:"1px solid #ccff0018",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>第 1 天 · 全身啟動</div>
+          <div style={{padding:"3px 10px",background:"#CCFF00",borderRadius:20,fontSize:10,fontWeight:900,color:"#000"}}>FREE</div>
+        </div>
+        <div style={{padding:"14px 14px"}}>
+          <div style={{fontSize:12,fontWeight:800,color:"#CCFF00",marginBottom:10}}>🏋️ 今日訓練</div>
+          {DAY1.workout.exercises.map((ex,i)=>(
+            <div key={i} onClick={()=>setExpEx(expEx===i?null:i)} className="tap"
+              style={{padding:"10px 11px",background:expEx===i?"#111":"transparent",borderRadius:11,marginBottom:5,border:`1px solid ${expEx===i?"#ccff0025":"#1a1a1a"}`,cursor:"pointer"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:800,color:"#E5E7EB"}}>{ex.name}</div>
+                  <div style={{fontSize:11,color:"#6B7280",marginTop:1}}>{ex.sets}組 × {ex.reps}</div>
+                </div>
+                <span style={{fontSize:12,color:"#CCFF00",display:"inline-block",transform:expEx===i?"rotate(180deg)":"none",transition:"transform .2s"}}>▾</span>
+              </div>
+              {expEx===i && <div className="au" style={{marginTop:8,padding:"8px 10px",background:"#0a0a0a",borderRadius:9,borderLeft:"2px solid #CCFF00",fontSize:12,color:"#9CA3AF",lineHeight:1.75}}>💡 {ex.tip}</div>}
+            </div>
+          ))}
+          <div style={{height:1,background:"linear-gradient(90deg,#ccff0020,transparent)",margin:"14px 0"}}/>
+          <div style={{fontSize:12,fontWeight:800,color:"#CCFF00",marginBottom:10}}>🍳 早餐方案</div>
+          {DAY1.breakfast.items.map((item,i)=>(
+            <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:i<2?"1px solid #1a1a1a":"none"}}>
+              <div><div style={{fontSize:13,fontWeight:700,color:"#E5E7EB"}}>{item.food}</div><div style={{fontSize:11,color:"#6B7280",marginTop:1}}>{item.note}</div></div>
+              <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
+                <div style={{fontSize:12,fontWeight:700,color:"#CCFF00"}}>{item.kcal}kcal</div>
+                <div style={{fontSize:11,color:"#FF9500"}}>蛋白{item.prot}g</div>
+              </div>
+            </div>
+          ))}
+          <div style={{marginTop:11,padding:"10px 12px",background:"#111",borderRadius:10,border:"1px solid #ccff0020",display:"flex",justifyContent:"space-between"}}>
+            <span style={{fontSize:12,color:"#6B7280"}}>早餐合計</span>
+            <div style={{display:"flex",gap:10}}>
+              <span style={{fontSize:15,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#CCFF00"}}>{DAY1.breakfast.total.kcal}kcal</span>
+              <span style={{fontSize:15,fontWeight:900,fontFamily:"'Bebas Neue',sans-serif",color:"#FF9500"}}>{DAY1.breakfast.total.prot}g蛋白</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Days 2–7 */}
+      {isVip ? (
+        <div className="card" style={{border:"1.5px solid rgba(255,215,0,.2)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:14}}>
+            <div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>📋 7 天完整飲食計畫</div>
+            <div className="vs bp" style={{marginLeft:"auto",fontSize:10,fontWeight:900,padding:"3px 10px",border:"1px solid rgba(255,215,0,.35)",borderRadius:20}}>👑 VIP</div>
+          </div>
+          {WEEK_PLAN.map((d,i)=>(
+            <div key={i} onClick={()=>setOpenDay(openDay===i?null:i)} className="tap"
+              style={{background:openDay===i?"#111":"transparent",borderRadius:12,padding:"11px 12px",marginBottom:7,border:`1px solid ${openDay===i?"#ccff0022":"#1a1a1a"}`,cursor:"pointer"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:13,fontWeight:800,color:"#E5E7EB"}}>第 {d.day} 天</span>
+                <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                  <span style={{fontSize:11,color:"#CCFF00",fontWeight:700}}>{d.kcal}kcal</span>
+                  <span style={{fontSize:11,color:"#FF9500",fontWeight:700}}>{d.prot}g蛋白</span>
+                  <span style={{fontSize:12,color:"#CCFF00",display:"inline-block",transform:openDay===i?"rotate(180deg)":"none",transition:"transform .2s"}}>▾</span>
+                </div>
+              </div>
+              {openDay===i && (
+                <div className="au" style={{marginTop:10,paddingTop:10,borderTop:"1px solid #1f1f1f"}}>
+                  {d.meals.map((m,j)=>(
+                    <div key={j} style={{display:"flex",gap:8,padding:"4px 0",fontSize:12,color:"#9CA3AF",lineHeight:1.7}}>
+                      <span style={{color:"#CCFF00",flexShrink:0}}>▸</span>{m}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{position:"relative",borderRadius:16,overflow:"hidden",marginBottom:14}}>
+          <div className="blk" style={{background:"#0a0a0a",borderRadius:16,border:"1px solid #1f1f1f",padding:18}}>
+            {[2,3,4,5,6,7].map(d=>(
+              <div key={d} style={{padding:"11px 0",borderBottom:"1px solid #111"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#444",marginBottom:4}}>第 {d} 天</div>
+                <div style={{fontSize:11,color:"#222"}}>訓練計畫 + 飲食菜單...</div>
+              </div>
+            ))}
+            <div style={{height:40}}/>
+          </div>
+          <div className="lov">
+            <div style={{fontSize:32}}>🔒</div>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontSize:16,fontWeight:900,color:"#F9FAFB",marginBottom:4}}>第 2–7 天完整計畫</div>
+              <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.9,marginBottom:4}}>大衛教練親自設計的科學邏輯</div>
+              <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.9}}>包含：7天訓練課表・7天飲食菜單<br/>LINE 飲食週報審核・VIP 私訊通道</div>
+            </div>
+            <button onClick={()=>onNeedVip("第 2–7 天完整計畫")} className="rh gg tap"
+              style={{padding:"13px 26px",background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:12,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",lineHeight:1.7,textAlign:"center"}}>
+              🔓 VIP 解鎖 NT$199
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* LINE CTA */}
+      <button onClick={lineConsult} className="rh gf tap"
+        style={{width:"100%",padding:16,background:"linear-gradient(135deg,#FFD700,#FF8800)",border:"none",borderRadius:14,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",lineHeight:1.7,display:"flex",alignItems:"center",justifyContent:"center",gap:9}}>
+        <span style={{fontSize:20}}>💬</span>
+        <div>LINE 大衛教練預約一對一<br/><span style={{fontSize:11,fontWeight:700,opacity:.85}}>客製化計畫 + 每週報告審核</span></div>
+      </button>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════
+   TAB: AI
+════════════════════════════════════ */
+function AITab({appState, setAppState, onNeedVip}) {
+  const {goal, isVip, logs=[]} = appState;
+  const todayLog = logs.find(l=>l.date===isoToday());
+
+  const res = todayLog ? {
+    tdee:todayLog.tdee,
+    goalLabel:todayLog.goal+"kcal",
+    prot:todayLog.prot,
+  } : null;
+
+  const [msgs,    setMsgs]    = useState([]);
+  const [inp,     setInp]     = useState("");
+  const [busy,    setBusy]    = useState(false);
+  const [showPhoto, setShowPhoto] = useState(false);
+  const [showVipPrompt, setShowVipPrompt] = useState(false);
+  const [showUnlock, setShowUnlock] = useState(false);
+  const botRef = useRef(null);
+  const gi = GOALS.find(g=>g.id===goal)||GOALS[0];
+
+  const QUICK_Q = ["今天蛋白質不夠怎麼辦？","訓練前吃什麼最好？","休息日要怎麼吃？","超商怎麼湊足蛋白質？","睡前補充什麼？","怎麼用外食達標？"];
+
+  const SYS = {
+    muscle:`你是大衛教練的增肌助手，說繁體中文。強調：熱量盈餘300kcal、每公斤1.8g蛋白質、漸進超負荷。語氣積極有力，每次回覆150字內，可條列式。`,
+    cut:   `你是大衛教練的減脂助手，說繁體中文。強調：缺口400kcal、高蛋白保肌、飽足感。語氣務實支持，每次回覆150字內。`,
+    keep:  `你是大衛教練的維持助手，說繁體中文。強調：TDEE平衡、動作品質。每次回覆150字內。`,
+  };
+
+  useEffect(()=>{
+    setMsgs([{from:"coach",text:`嗨！我是大衛教練的 AI 助手 💪\n目前模式：${gi.icon} ${gi.label}${res?`\nTDEE ${res.tdee}kcal，蛋白質目標 ${res.prot}g/日`:""}\n\n有任何飲食或訓練問題，直接問我！`}]);
+  },[goal]);
+
+  useEffect(()=>{ botRef.current?.scrollIntoView({behavior:"smooth"}); },[msgs,busy]);
+
+  const send = async (q) => {
+    if (!q.trim()||busy) return;
+    setMsgs(m=>[...m,{from:"user",text:q}]); setInp(""); setBusy(true);
+    const ctx = res ? `\n用戶數據：TDEE=${res.tdee}，蛋白質目標=${res.prot}g/日` : "";
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:1000,
+          system:SYS[goal]+ctx,
+          messages:[{role:"user",content:q}]
+        })
+      });
+      const d = await r.json();
+      const txt = d.content?.map(c=>c.type==="text"?c.text:"").join("")||"暫時無法回覆，請稍後再試。";
+      setMsgs(m=>[...m,{from:"coach",text:txt}]);
+    } catch(e) {
+      setMsgs(m=>[...m,{from:"coach",text:"網路連線問題，請稍後再試 💪"}]);
+    }
+    setBusy(false);
+  };
+
+  const handlePhotoClick = () => {
+    if (isVip) { setShowPhoto(true); }
+    else { setShowVipPrompt(true); }
+  };
+
+  return (
+    <div>
+      {showPhoto && isVip && <PhotoAuditModal res={res} onClose={()=>setShowPhoto(false)}/>}
+      {showVipPrompt && (
+        <VIPPromptModal
+          feature="AI 拍照送大衛教練審核"
+          onClose={()=>setShowVipPrompt(false)}
+          onGoLine={()=>{lineConsult();setShowVipPrompt(false);}}
+          onGoUnlock={()=>{setShowVipPrompt(false);setShowUnlock(true);}}
+        />
+      )}
+      {showUnlock && (
+        <VIPUnlockModal
+          onUnlock={()=>{setAppState(s=>({...s,isVip:true}));setShowUnlock(false);}}
+          onClose={()=>setShowUnlock(false)}
+        />
+      )}
+
+      <div className="card" style={{marginBottom:14}}><GoalSelector goal={goal} setGoal={v=>setAppState(s=>({...s,goal:v}))}/></div>
+
+      {/* Chat */}
+      <div style={{background:"#0a0a0a",borderRadius:16,border:`1.5px solid ${gi.color}20`,overflow:"hidden",marginBottom:14}}>
+        <div style={{padding:"12px 14px",borderBottom:"1px solid #1a1a1a",display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:32,height:32,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>🤖</div>
+          <div>
+            <div style={{fontSize:13,fontWeight:900,color:"#CCFF00"}}>AI 教練決策助手</div>
+            <div style={{fontSize:10,color:"#4B5563"}}>{gi.icon} {gi.label}模式 · Claude AI 驅動</div>
+          </div>
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:"#CCFF00"}}/>
+            <span style={{fontSize:10,color:"#CCFF00"}}>線上</span>
+          </div>
+        </div>
+        <div style={{height:230,overflowY:"auto",padding:"12px 12px 6px",display:"flex",flexDirection:"column",gap:10}}>
+          {msgs.map((m,i)=>(
+            <div key={i} className="cb" style={{display:"flex",justifyContent:m.from==="user"?"flex-end":"flex-start"}}>
+              {m.from==="coach" && <div style={{width:26,height:26,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginRight:7,alignSelf:"flex-end"}}>🤖</div>}
+              <div style={{maxWidth:"82%",padding:"10px 12px",borderRadius:m.from==="user"?"14px 14px 4px 14px":"14px 14px 14px 4px",background:m.from==="user"?"#CCFF00":"#161616",color:m.from==="user"?"#000":"#D1D5DB",fontSize:12,lineHeight:1.85,fontWeight:m.from==="user"?700:400,whiteSpace:"pre-wrap",border:m.from==="coach"?"1px solid #ccff0016":"none"}}>{m.text}</div>
+            </div>
+          ))}
+          {busy && (
+            <div className="cb" style={{display:"flex",alignItems:"flex-end",gap:7}}>
+              <div style={{width:26,height:26,background:"#CCFF00",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
+              <div style={{background:"#161616",borderRadius:"14px 14px 14px 4px",padding:"10px 13px",border:"1px solid #ccff0016",display:"flex",gap:4}}>
+                {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"#CCFF00",animation:`dotPulse 1.2s ease-in-out ${i*.2}s infinite`}}/>)}
+              </div>
+            </div>
+          )}
+          <div ref={botRef}/>
+        </div>
+        <div style={{padding:"7px 12px",borderTop:"1px solid #1a1a1a",display:"flex",gap:5,flexWrap:"wrap"}}>
+          {QUICK_Q.slice(0,4).map(q=>(
+            <button key={q} onClick={()=>send(q)} className="tap"
+              style={{padding:"5px 9px",background:"#141414",border:"1px solid #ccff0022",borderRadius:20,cursor:"pointer",fontSize:10,color:"#CCFF00",fontWeight:700}}>
+              {q}
+            </button>
+          ))}
+        </div>
+        <div style={{padding:"10px 12px",borderTop:"1px solid #1a1a1a",display:"flex",gap:7}}>
+          <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(inp);}}}
+            placeholder="問大衛教練任何問題…"
+            style={{flex:1,background:"#141414",border:"1px solid #2a2a2a",borderRadius:10,color:"#D1D5DB",padding:"10px 12px",fontSize:12}}/>
+          <button onClick={()=>send(inp)} disabled={busy||!inp.trim()} className="tap"
+            style={{padding:"10px 14px",background:busy||!inp.trim()?"#1a1a1a":"#CCFF00",border:"none",borderRadius:10,cursor:busy||!inp.trim()?"default":"pointer",fontSize:13,fontWeight:900,color:busy||!inp.trim()?"#333":"#000",transition:"all .2s"}}>
+            {busy?"…":"送出"}
+          </button>
+        </div>
+        {/* Photo button */}
+        <div style={{padding:"0 12px 12px"}}>
+          <button onClick={handlePhotoClick} className={`rh tap ${isVip?"gb":""}`}
+            style={{width:"100%",padding:13,borderRadius:12,border:`1.5px solid ${isVip?"#38BDF840":"#1f1f1f"}`,background:isVip?"#38BDF808":"transparent",cursor:"pointer",fontSize:13,fontWeight:700,color:isVip?"#38BDF8":"#4B5563",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s"}}>
+            <span style={{fontSize:17}}>📷</span>
+            <span>傳送餐點給大衛教練審核</span>
+            {!isVip && <span style={{fontSize:10,background:"linear-gradient(135deg,#FFD700,#FF8800)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontWeight:900}}>🔐 VIP</span>}
+            {isVip  && <span style={{fontSize:10,color:"#38BDF8",fontWeight:700}}>真人回覆</span>}
+          </button>
+        </div>
+      </div>
+
+      {!isVip && (
+        <button onClick={lineConsult} className="rh gg tap"
+          style={{width:"100%",padding:15,background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:14,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:9}}>
+          <span style={{fontSize:20}}>📅</span>想大衛教練親自一對一指導？立即預約
+        </button>
+      )}
+      {isVip && (
+        <div style={{background:"linear-gradient(135deg,rgba(255,215,0,.07),rgba(255,136,0,.05))",border:"1px solid rgba(255,215,0,.22)",borderRadius:14,padding:"13px 15px",display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{fontSize:20}}>👑</span>
+          <div><div className="vs" style={{fontSize:12,fontWeight:900,letterSpacing:1,marginBottom:3}}>VIP 私訊優先通道</div><div style={{fontSize:11,color:"#9CA3AF"}}>你的問題大衛教練親自優先回覆</div></div>
+          <button onClick={lineConsult} className="rh tap"
+            style={{marginLeft:"auto",padding:"8px 12px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#FFD700,#FF8800)",cursor:"pointer",fontSize:12,fontWeight:900,color:"#000",flexShrink:0}}>
+            LINE 優先
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════
+   TAB: DINING
+════════════════════════════════════ */
+function DiningTab({onNeedVip}) {
+  const FREE_GUIDES = [
+    {store:"超商快攻",color:"#CCFF00",icon:"🏪",items:[
+      {ok:true,  item:"義式雞胸肉 + 無糖豆漿",       why:"25g 蛋白質，超商最強 CP 組合"},
+      {ok:true,  item:"茶葉蛋 ×2 + 希臘優格",         why:"20g 蛋白質，隨時補充零難度"},
+      {ok:false, item:"全糖珍珠奶茶",                 why:"60g 精製糖、零蛋白質，增肌地雷"},
+    ]},
+    {store:"速食快攻",color:"#FF9500",icon:"🍔",items:[
+      {ok:true,  item:"麥辣雞腿堡 + 玉米杯",         why:"29g 蛋白質，薯條換玉米省 280kcal"},
+      {ok:true,  item:"黑咖啡（無糖）",               why:"提神零熱量，訓練前最佳"},
+      {ok:false, item:"薯條 + 含糖飲料",              why:"高GI + 精製糖，雙重地雷"},
+    ]},
+    {store:"外食自助餐",color:"#38BDF8",icon:"🍱",items:[
+      {ok:true,  item:"蒸魚 + 炒豆腐 + 燙青菜",      why:"高蛋白低脂，自助餐最優解"},
+      {ok:true,  item:"滷雞腿（去皮）+ 半碗飯",       why:"蛋白質充足，碳水不過量"},
+      {ok:false, item:"炸排骨 + 炒飯",                why:"油脂過高，熱量密度爆表"},
+    ]},
+  ];
+
+  return (
+    <div>
+      <div style={{fontSize:12,color:"#6B7280",marginBottom:14,padding:"12px 13px",background:"#0a0a0a",borderRadius:12,borderLeft:"3px solid #CCFF00",lineHeight:1.85}}>
+        🍽️ <span style={{color:"#CCFF00",fontWeight:800}}>外食生存指南</span> — 基礎攻略公開，私藏進階 VIP 解鎖。
+      </div>
+
+      {FREE_GUIDES.map(g=>(
+        <div key={g.store} style={{marginBottom:14,background:"#0a0a0a",borderRadius:16,overflow:"hidden",border:`1px solid ${g.color}18`}}>
+          <div style={{padding:"10px 14px",borderBottom:"1px solid #1a1a1a",display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:17}}>{g.icon}</span>
+            <span style={{fontSize:13,fontWeight:900,color:g.color}}>{g.store}</span>
+            <span style={{marginLeft:"auto",fontSize:10,color:"#CCFF00",background:"rgba(204,255,0,.1)",padding:"2px 8px",borderRadius:20,fontWeight:700}}>FREE</span>
+          </div>
+          <div style={{padding:"12px 14px"}}>
+            {g.items.map((item,i)=>(
+              <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<g.items.length-1?"1px solid #111":"none",alignItems:"flex-start"}}>
+                <span style={{fontSize:14,flexShrink:0,marginTop:1}}>{item.ok?"✅":"🚫"}</span>
+                <div><div style={{fontSize:12,fontWeight:800,color:item.ok?"#E5E7EB":"#9CA3AF",marginBottom:2}}>{item.item}</div><div style={{fontSize:11,color:"#6B7280",lineHeight:1.65}}>{item.why}</div></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Locked advanced guide */}
+      <div style={{position:"relative",borderRadius:16,overflow:"hidden",marginBottom:14}}>
+        <div className="blk" style={{padding:18,background:"#0a0a0a",borderRadius:16,border:"1px solid #1f1f1f"}}>
+          {["火鍋增肌點菜完整指南","便當店點法 SOP","夜市吃不胖攻略","飯局喝酒後的急救方案","訓練日 vs 休息日外食策略","深夜不囤脂宵夜組合"].map((c,i)=>(
+            <div key={i} style={{fontSize:12,color:"#333",padding:"5px 0",borderBottom:"1px solid #0f0f0f",display:"flex",gap:8}}><span>▸</span>{c}</div>
+          ))}
+          <div style={{height:45}}/>
+        </div>
+        <div className="lov">
+          <div style={{fontSize:30}}>🔒</div>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:16,fontWeight:900,color:"#F9FAFB",marginBottom:4}}>6 大場景完整攻略</div>
+            <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.85}}>大衛教練私藏外食避坑指南</div>
+          </div>
+          <button onClick={()=>onNeedVip("私藏外食完整攻略")} className="rh gg tap"
+            style={{padding:"13px 26px",background:"linear-gradient(135deg,#CCFF00,#aaee00)",border:"none",borderRadius:12,cursor:"pointer",fontSize:14,fontWeight:900,color:"#000",textAlign:"center"}}>
+            🔓 VIP 解鎖 NT$199
+          </button>
+        </div>
+      </div>
+
+      {/* Golden rules */}
+      <div style={{background:"#0d0d0a",borderRadius:16,padding:18,border:"1.5px solid #ccff0020"}}>
+        <div style={{fontSize:14,fontWeight:900,color:"#CCFF00",marginBottom:13}}>⚡ 黃金法則（免費放送）</div>
+        {["每餐蛋白質：體重 × 0.4g，缺口靠蛋和豆漿補","碳水控制：一個拳頭大小 = 一份，不過量","進食順序：蛋白質 → 蔬菜 → 碳水，血糖穩定","訓練日多吃 200–300kcal 碳水，促進合成","睡前補充 20–30g 酪蛋白，夜間增肌不停歇"].map((r,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"flex-start",gap:11,padding:"10px 0",borderBottom:i<4?"1px solid #111":"none"}}>
+            <div style={{width:24,height:24,background:"#CCFF00",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"#000",flexShrink:0,marginTop:1}}>{i+1}</div>
+            <div style={{fontSize:13,color:"#D1D5DB",lineHeight:1.75}}>{r}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════
+   ROOT APP
+════════════════════════════════════ */
+function App() {
+  const [appState, _setAppState] = useState(()=>loadState());
+  const [tab, setTab]            = useState("calc");
+  const [toast, setToast]        = useState(null);
+  const [showUnlock,  setShowUnlock]  = useState(false);
+  const [showVipActivated, setShowVipActivated] = useState(false);
+  const [vipPromptFeature, setVipPromptFeature] = useState(null);
+  const [tiredOpen, setTiredOpen] = useState(false);
+
+  // Wrap setAppState to always persist
+  const setAppState = useCallback((updater) => {
+    _setAppState(prev => {
+      const next = typeof updater === "function" ? updater(prev) : {...prev,...updater};
+      saveState(next);
+      return next;
+    });
+  }, []);
+
+  // Handle tired modal triggered from DavidPersona inside CalcTab
+  useEffect(()=>{
+    if (appState._tired) {
+      setTiredOpen(true);
+      setAppState(s=>({...s,_tired:false}));
+    }
+  },[appState._tired]);
+
+  const onToast   = msg => setToast(msg);
+  const onNeedVip = feature => setVipPromptFeature(feature);
+
+  const handleUnlock = () => {
+    setAppState(s=>({...s,isVip:true}));
+    setShowUnlock(false);
+    setVipPromptFeature(null);
+    setShowVipActivated(true);
+  };
+
+  const {isVip} = appState;
+
+  const TABS = [
+    {id:"calc",  label:"📊 計算"},
+    {id:"track", label:"📋 追蹤"},
+    {id:"plan",  label:"🗓 計畫"},
+    {id:"ai",    label:"🤖 AI"},
+    {id:"dining",label:"🍽 外食"},
+  ];
+
+  return (
+    <div style={{maxWidth:480,margin:"0 auto",position:"relative",zIndex:1}}>
+      {toast      && <Toast msg={toast} onDone={()=>setToast(null)}/>}
+      {tiredOpen  && <TiredModal onClose={()=>setTiredOpen(false)}/>}
+      {showUnlock && <VIPUnlockModal onUnlock={handleUnlock} onClose={()=>setShowUnlock(false)}/>}
+      {showVipActivated && <VIPActivated onClose={()=>setShowVipActivated(false)}/>}
+      {vipPromptFeature && (
+        <VIPPromptModal
+          feature={vipPromptFeature}
+          onClose={()=>setVipPromptFeature(null)}
+          onGoLine={()=>{lineConsult();setVipPromptFeature(null);}}
+          onGoUnlock={()=>{setVipPromptFeature(null);setShowUnlock(true);}}
+        />
+      )}
+
+      {/* Header */}
+      <div style={{background:"linear-gradient(180deg,#141410 0%,#0a0a08 100%)",borderBottom:"1px solid #ccff0010",padding:"16px 17px 13px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+          <div style={{width:48,height:48,flexShrink:0,borderRadius:14,background:"linear-gradient(135deg,#CCFF00,#aaee00)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 0 28px rgba(204,255,0,.45)"}}>💪</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:26,fontWeight:900,color:"#CCFF00",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:3,lineHeight:1}}>大衛教練</div>
+            <div style={{fontSize:10,color:"#4B5563",letterSpacing:2,marginTop:3}}>AI 增肌決策系統 · v6.3</div>
+          </div>
+          <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
+            <button onClick={()=>window.open(LINKTREE,"_blank")} className="tap"
+              style={{width:32,height:32,borderRadius:"50%",border:"1px solid #ccff0028",background:"transparent",color:"#CCFF00",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              🌐
+            </button>
+            {isVip && <div className="bp" style={{padding:"5px 10px",borderRadius:22,fontSize:10,fontWeight:900,background:"linear-gradient(135deg,#FFD700,#FF8800)",color:"#000"}}>👑 VIP</div>}
+          </div>
+        </div>
+        {!isVip ? (
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>setShowUnlock(true)} className="tap"
+              style={{flex:1,padding:"9px 0",borderRadius:11,border:"1.5px dashed rgba(255,215,0,.32)",background:"transparent",color:"#FFD700",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              🔐 輸入解鎖碼
+            </button>
+            <button onClick={lineConsult} className="rh gg tap"
+              style={{flex:1,padding:"9px 0",borderRadius:11,border:"none",background:"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",fontSize:12,fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              💬 LINE 教練 NT$199
+            </button>
+          </div>
+        ) : (
+          <div style={{display:"flex",alignItems:"center",gap:10,padding:"9px 13px",background:"linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,136,0,.05))",border:"1px solid rgba(255,215,0,.22)",borderRadius:11}}>
+            <span style={{fontSize:16}}>👑</span>
+            <div>
+              <div className="vs" style={{fontSize:12,fontWeight:900,letterSpacing:1}}>VIP 功能全解鎖</div>
+              <div style={{fontSize:10,color:"#6B7280",marginTop:1}}>7天計畫・AI拍照・私訊優先</div>
+            </div>
+            <button onClick={lineConsult} className="tap"
+              style={{marginLeft:"auto",padding:"6px 12px",borderRadius:20,border:"1px solid rgba(255,215,0,.32)",background:"transparent",color:"#FFD700",fontSize:11,fontWeight:700,cursor:"pointer"}}>
+              LINE 優先諮詢
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Ticker */}
+      <Ticker/>
+
+      {/* Tabs */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:4,padding:"10px 14px 0",background:"#080808"}}>
+        {TABS.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} className="tap"
+            style={{padding:"10px 2px",borderRadius:11,border:tab===t.id?"none":"1px solid #1f1f1f",cursor:"pointer",fontSize:10,fontWeight:800,transition:"all .2s",background:tab===t.id?"#CCFF00":"transparent",color:tab===t.id?"#000":"#4B5563"}}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      <div style={{padding:"14px 15px 120px"}}>
+        {tab==="calc"   && <CalcTab  appState={appState} setAppState={setAppState} onToast={onToast} onNeedVip={onNeedVip}/>}
+        {tab==="track"  && <TrackTab appState={appState} setAppState={setAppState} onToast={onToast}/>}
+        {tab==="plan"   && <PlanTab  appState={appState} setAppState={setAppState} onNeedVip={onNeedVip}/>}
+        {tab==="ai"     && <AITab    appState={appState} setAppState={setAppState} onNeedVip={onNeedVip}/>}
+        {tab==="dining" && <DiningTab onNeedVip={onNeedVip}/>}
+      </div>
+
+      {/* Float LINE button */}
       <button className="tap gg" onClick={lineConsult}
-        style={{position:"fixed",bottom:24,right:16,zIndex:990,background:"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",border:"none",borderRadius:50,padding:"13px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:9,boxShadow:"0 4px 26px rgba(204,255,0,.5),0 0 52px rgba(204,255,0,.15)",WebkitTapHighlightColor:"transparent"}}>
+        style={{position:"fixed",bottom:24,right:16,zIndex:990,background:"linear-gradient(135deg,#CCFF00,#aaee00)",color:"#000",border:"none",borderRadius:50,padding:"13px 17px",cursor:"pointer",display:"flex",alignItems:"center",gap:8,boxShadow:"0 4px 26px rgba(204,255,0,.5)",WebkitTapHighlightColor:"transparent"}}>
         <span style={{fontSize:20}}>💬</span>
         <div style={{textAlign:"left"}}>
           <div style={{fontSize:13,fontWeight:900}}>LINE 大衛教練</div>
           <div style={{fontSize:10,fontWeight:600,opacity:.65}}>預約 · 取得解鎖碼</div>
         </div>
       </button>
+
+      <div style={{position:"fixed",bottom:8,left:"50%",transform:"translateX(-50%)",fontSize:9,letterSpacing:2.5,color:"rgba(204,255,0,.04)",fontWeight:700,pointerEvents:"none",zIndex:0,whiteSpace:"nowrap",fontFamily:"'JetBrains Mono',monospace"}}>
+        COACH DAVID · MUSCLE SYSTEM v6.3 · ALL RIGHTS RESERVED
+      </div>
     </div>
   );
 }
